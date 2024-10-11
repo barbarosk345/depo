@@ -2,10 +2,10 @@
 import React, { useState } from "react";
 import Draggable from "react-draggable";
 import styled from "styled-components";
-import { FiSettings } from "react-icons/fi";
+import { FiSettings, FiInfo } from "react-icons/fi";
 import BackgroundColorSelector from "./BackgroundColorSelector"; // Adjust the import path as needed
 
-// Extend the interface to include backgroundColor props
+// Extend the interface to include backgroundColor props and camera swing
 interface ParameterControlsProps {
   scrollSpeed: number;
   setScrollSpeed: React.Dispatch<React.SetStateAction<number>>;
@@ -15,30 +15,42 @@ interface ParameterControlsProps {
   setCameraMovementSpeed: React.Dispatch<React.SetStateAction<number>>;
   cameraRotationSensitivity: number;
   setCameraRotationSensitivity: React.Dispatch<React.SetStateAction<number>>;
-  backgroundColor: string; // New prop
-  setBackgroundColor: (color: string) => void; // New prop
+  cameraSwing: number;
+  setCameraSwing: React.Dispatch<React.SetStateAction<number>>;
+  backgroundColor: string;
+  setBackgroundColor: (color: string) => void;
 }
 
-const Handle = styled.div<{ isDraggingDisabled: boolean }>`
+const Container = styled.div`
   position: absolute;
-  bottom: 10px;
-  left: 10px;
-  background-color: #1e1e1e; /* Dark background */
-  padding: 16px; /* Reduced padding for tighter layout */
+  top: 10px;
+  left: 300px;
+  background-color: #1e1e1e;
   border-radius: 8px;
-  color: #ffffff; /* Light text */
+  color: #ffffff;
   z-index: 1000;
-  cursor: ${({ isDraggingDisabled }) => (isDraggingDisabled ? "not-allowed" : "move")};
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  width: 280px; /* Adjusted width */
+  width: 280px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  transition: background-color 0.3s ease, cursor 0.3s ease;
 
   @media (max-width: 480px) {
     width: 90%;
     left: 5%;
-    padding: 12px;
   }
+`;
+
+
+const Handle = styled.div`
+  padding: 16px;
+  cursor: move;
+  background-color: #2c2c2c;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  user-select: none;
+`;
+
+const ControlsContainer = styled.div`
+  padding: 16px;
 `;
 
 const Header = styled.div`
@@ -67,40 +79,104 @@ const ToggleButton = styled.button`
   transition: color 0.3s ease;
 
   &:hover {
-    color: #1e90ff; /* DodgerBlue on hover */
+    color: #1e90ff;
   }
 `;
 
-const ControlsContainer = styled.div`
-  margin-top: 12px;
-`;
+
 
 const ControlRow = styled.div`
   display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+`;
+
+const LabelRow = styled.div`
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px; /* Reduced margin */
+  margin-bottom: 5px;
 `;
 
 const Label = styled.label`
-  flex: 1;
   font-size: 14px;
   color: #dddddd;
 `;
 
-const Input = styled.input`
-  width: 60px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid #555555;
-  background-color: #2c2c2c;
-  color: #ffffff;
+const Value = styled.span`
   font-size: 14px;
-  margin-left: 8px;
+  color: #1e90ff;
+`;
 
-  &:focus {
-    border-color: #1e90ff;
-    outline: none;
-    box-shadow: 0 0 5px rgba(30, 144, 255, 0.5);
+const Slider = styled.input`
+  width: 100%;
+  -webkit-appearance: none;
+  height: 5px;
+  border-radius: 5px;
+  background: #555555;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #1e90ff;
+    cursor: pointer;
+  }
+
+  &::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #1e90ff;
+    cursor: pointer;
+  }
+`;
+
+const Tooltip = styled.div`
+  position: relative;
+  display: inline-block;
+  margin-left: 5px;
+
+  &:hover span {
+    visibility: visible;
+    opacity: 1;
+  }
+`;
+
+const TooltipText = styled.span`
+  visibility: hidden;
+  width: 200px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
   }
 `;
 
@@ -113,90 +189,145 @@ const ParameterControls: React.FC<ParameterControlsProps> = ({
   setCameraMovementSpeed,
   cameraRotationSensitivity,
   setCameraRotationSensitivity,
-  backgroundColor, // New prop
-  setBackgroundColor, // New prop
+  cameraSwing,
+  setCameraSwing,
+  backgroundColor,
+  setBackgroundColor,
 }) => {
-  // Internal state to manage visibility
   const [showControls, setShowControls] = useState<boolean>(true);
 
-  // State to manage draggable behavior
-  const [isDraggingDisabled, setIsDraggingDisabled] = useState<boolean>(false);
-
-  // Handlers to disable dragging when focusing on inputs
-  const handleFocus = () => setIsDraggingDisabled(true);
-  const handleBlur = () => setIsDraggingDisabled(false);
-
   return (
-    <Draggable handle=".handle" disabled={isDraggingDisabled}>
-      <Handle className="handle" isDraggingDisabled={isDraggingDisabled}>
-        <Header>
-          <Title>
-            <FiSettings style={{ marginRight: "8px" }} />
-            Settings
-          </Title>
-          <ToggleButton
-            onClick={() => setShowControls(!showControls)}
-            aria-label="Toggle Controls Visibility"
-            aria-expanded={showControls}
-          >
-            {showControls ? "▲" : "▼"}
-          </ToggleButton>
-        </Header>
+    <Draggable handle=".handle">
+      <Container>
+        <Handle className="handle">
+          <Header>
+            <Title>
+              <FiSettings style={{ marginRight: "8px" }} />
+              Settings
+            </Title>
+            <ToggleButton
+              onClick={() => setShowControls(!showControls)}
+              aria-label="Toggle Controls Visibility"
+              aria-expanded={showControls}
+            >
+              {showControls ? "▲" : "▼"}
+            </ToggleButton>
+          </Header>
+        </Handle>
         {showControls && (
           <ControlsContainer>
             {/* Scroll Speed */}
             <ControlRow>
-              <Label htmlFor="scrollSpeed">Scroll Speed:</Label>
-              <Input
+              <LabelRow>
+                <Label htmlFor="scrollSpeed">
+                  Scroll Speed
+                  <Tooltip>
+                    <FiInfo />
+                    <TooltipText>Adjusts how fast you move through the scene when scrolling</TooltipText>
+                  </Tooltip>
+                </Label>
+                <Value>{scrollSpeed.toFixed(2)}</Value>
+              </LabelRow>
+              <Slider
                 id="scrollSpeed"
-                type="number"
+                type="range"
+                min="0.01"
+                max="0.5"
                 step="0.01"
                 value={scrollSpeed}
                 onChange={(e) => setScrollSpeed(parseFloat(e.target.value))}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
               />
             </ControlRow>
 
             {/* Animation Frames */}
             <ControlRow>
-              <Label htmlFor="animationFrames">Animation Frames:</Label>
-              <Input
+              <LabelRow>
+                <Label htmlFor="animationFrames">
+                  Return To Path Delay
+                  <Tooltip>
+                    <FiInfo />
+                    <TooltipText>Controls the speed of animation back to path</TooltipText>
+                  </Tooltip>
+                </Label>
+                <Value>{animationFrames}</Value>
+              </LabelRow>
+              <Slider
                 id="animationFrames"
-                type="number"
+                type="range"
+                min="30"
+                max="240"
                 step="1"
                 value={animationFrames}
                 onChange={(e) => setAnimationFrames(parseInt(e.target.value, 10))}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
               />
             </ControlRow>
 
             {/* Camera Fly Speed */}
             <ControlRow>
-              <Label htmlFor="cameraMovementSpeed">Camera Fly Speed:</Label>
-              <Input
+              <LabelRow>
+                <Label htmlFor="cameraMovementSpeed">
+                  Camera Free Fly Speed
+                  <Tooltip>
+                    <FiInfo />
+                    <TooltipText>Adjusts how fast the camera moves in free-fly mode</TooltipText>
+                  </Tooltip>
+                </Label>
+                <Value>{cameraMovementSpeed.toFixed(2)}</Value>
+              </LabelRow>
+              <Slider
                 id="cameraMovementSpeed"
-                type="number"
+                type="range"
+                min="0.01"
+                max="1"
                 step="0.01"
                 value={cameraMovementSpeed}
                 onChange={(e) => setCameraMovementSpeed(parseFloat(e.target.value))}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
               />
             </ControlRow>
 
             {/* Camera Rotation Sensitivity */}
             <ControlRow>
-              <Label htmlFor="cameraRotationSensitivity">Camera Rotation Sensitivity:</Label>
-              <Input
+              <LabelRow>
+                <Label htmlFor="cameraRotationSensitivity">
+                  Camera Rotation Friction
+                  <Tooltip>
+                    <FiInfo />
+                    <TooltipText>Adjusts how sensitive the camera is to mouse movements </TooltipText>
+                  </Tooltip>
+                </Label>
+                <Value>{cameraRotationSensitivity}</Value>
+              </LabelRow>
+              <Slider
                 id="cameraRotationSensitivity"
-                type="number"
-                step="1"
+                type="range"
+                min="1000"
+                max="100000"
+                step="100"
                 value={cameraRotationSensitivity}
                 onChange={(e) => setCameraRotationSensitivity(parseFloat(e.target.value))}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
+              />
+            </ControlRow>
+
+            {/* Camera Swing */}
+            <ControlRow>
+              <LabelRow>
+                <Label htmlFor="cameraSwing">
+                  Camera Swing Dampening
+                  <Tooltip>
+                    <FiInfo />
+                    <TooltipText>Controls how much the camera swings off path when interpolating rotation</TooltipText>
+                  </Tooltip>
+                </Label>
+                <Value>{cameraSwing.toFixed(2)}</Value>
+              </LabelRow>
+              <Slider
+                id="cameraSwing"
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={cameraSwing}
+                onChange={(e) => setCameraSwing(parseFloat(e.target.value))}
               />
             </ControlRow>
 
@@ -207,7 +338,7 @@ const ParameterControls: React.FC<ParameterControlsProps> = ({
             />
           </ControlsContainer>
         )}
-      </Handle>
+      </Container>
     </Draggable>
   );
 };

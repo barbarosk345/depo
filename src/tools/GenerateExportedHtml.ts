@@ -25,7 +25,8 @@ export const generateExportedHTML = (
     color: string;
   }>,
   cameraConstraintMode: "auto" | "path" = "auto",
-  freeFlyEnabled: boolean = false
+  freeFlyEnabled: boolean = false,
+  cameraDampeningRef: number
 ) => {
   return `
 <!DOCTYPE html>
@@ -854,7 +855,7 @@ export const generateExportedHTML = (
           camera.rotationQuaternion = BABYLON.Quaternion.Slerp(
             camera.rotationQuaternion,
             targetRotation,
-            0.05 // Damping factor for rotation (adjust between 0 and 1 for smoothness)
+            ${cameraDampeningRef} // Damping factor for rotation (adjust between 0 and 1 for smoothness)
           ).normalize();
         }
 

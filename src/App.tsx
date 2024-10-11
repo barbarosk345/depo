@@ -105,6 +105,9 @@ const App: React.FC = () => {
   const cameraConstraintModeRef = useRef<'auto' | 'path' >('auto');
   const freeFlyEnabledRef = useRef(false);
 
+  const cameraDampeningRef = useRef(0.05);
+  const [cameraDampening, setCameraDampening] = useState<number>(0.95);
+
   const [cameraConstraintMode, setCameraConstraintMode] = useState<'auto' | 'path' >('path');
   const [freeFlyEnabled, setFreeFlyEnabled] = useState(false);
 
@@ -222,6 +225,11 @@ const App: React.FC = () => {
     }
   };
 
+  useEffect(() => { 
+   
+
+    cameraDampeningRef.current = 1 - cameraDampening === 0 ? 0.01 : 1 - cameraDampening;
+  }, [cameraDampening]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -444,7 +452,7 @@ engine.runRenderLoop(function () {
           camera.rotationQuaternion = BABYLON.Quaternion.Slerp(
             camera.rotationQuaternion,
             targetRotationRef.current,
-            0.05 // Damping factor for rotation (adjust between 0 and 1 for smoothness)
+            cameraDampeningRef.current// Damping factor for rotation (adjust between 0 and 1 for smoothness)
           ).normalize();
         }
 
@@ -676,7 +684,8 @@ engine.runRenderLoop(function () {
       animationFrames,
       hotspots,
       cameraConstraintMode,
-      freeFlyEnabled
+      freeFlyEnabled,
+      cameraDampeningRef.current
     );
 
     const blob = new Blob([htmlContent], { type: "text/html" });
@@ -830,6 +839,8 @@ engine.runRenderLoop(function () {
         setCameraRotationSensitivity={setCameraRotationSensitivity}
         backgroundColor={backgroundColor}
         setBackgroundColor={setBackgroundColor}
+        cameraSwing={cameraDampening}
+        setCameraSwing={setCameraDampening}
       />
       <ScrollControls
         scrollPercentage={scrollPercentage}

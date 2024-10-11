@@ -187,7 +187,7 @@ const HotspotManager = forwardRef<unknown, HotspotManagerProps>(({ scene, camera
         <div style={{
           position: 'absolute',
           top: '10px',
-          right: '350px',
+          right: '300px',
           transform: 'translateY(-50%)',
           backgroundColor: 'rgba(0, 0, 0, 0.7)',
           color: 'white',

@@ -2,7 +2,8 @@
 import React, { useState } from "react";
 import Draggable from "react-draggable";
 import styled from "styled-components";
-import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
+import { FiArrowLeft, FiArrowRight , FiCamera, FiCameraOff, FiMap} from "react-icons/fi";
+
 
 interface ScrollControlsProps {
   scrollPercentage: number;
@@ -18,8 +19,8 @@ interface ScrollControlsProps {
 // Styled Components
 const Handle = styled.div<{ isDraggingDisabled: boolean }>`
   position: absolute;
-  top: 10px;
-  left: 350px;
+  bottom: 10px;
+  left: calc(50% - 140px);
   transform: translateY(-50%);
   background-color: #1e1e1e; /* Dark background */
   padding: 16px; /* Reduced padding for tighter layout */
@@ -121,6 +122,34 @@ const ProgressBar = styled.div<{ percentage: number }>`
   /* Removed transition for immediate update */
 `;
 
+
+const ModeButton = styled(ToggleButton)`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background-color: #333;
+  margin-right: 10px;
+  width: auto;
+
+  &:hover {
+    background-color: #444;
+  }
+`;
+
+const IconWrapper = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  font-size: 20px;
+`;
+
+const ModeText = styled.span`
+  font-size: 14px;
+`;
+
 // Main Component
 
 const ScrollControls: React.FC<ScrollControlsProps> = ({
@@ -185,13 +214,20 @@ const ScrollControls: React.FC<ScrollControlsProps> = ({
                 </Button>
               </ControlRow>
               <ControlRow>
-                <ToggleButton onClick={toggleCameraConstraint}>
-                  Camera Constraint: {cameraConstraintMode === 'path' ? 'Path' : 'Auto'}
-                </ToggleButton>
+                <ModeButton onClick={toggleCameraConstraint}>
+                  <IconWrapper>
+                    {<FiCamera />}
+                  </IconWrapper>
+                  <ModeText>
+                    {cameraConstraintMode === 'path' ? 'Follow Path' : 'Auto'}
+                  </ModeText>
+                </ModeButton>
                 {cameraConstraintMode === 'path' && (
-                  <ToggleButton onClick={toggleFreeFly}>
-                    Free Fly: {freeFlyEnabled ? 'On' : 'Off'}
-                  </ToggleButton>
+                  <ModeButton onClick={toggleFreeFly}>
+                    <ModeText>
+                      {freeFlyEnabled ? 'Free Fly: On' : 'Free Fly: Off'}
+                    </ModeText>
+                  </ModeButton>
                 )}
               </ControlRow>
             </ControlsContainer>

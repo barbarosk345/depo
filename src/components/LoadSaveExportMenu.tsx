@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Draggable from "react-draggable";
 import styled from "styled-components";
-import { FiFolder, FiSave, FiUpload, FiDownload, FiTrash2, FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { FiFolder, FiSave, FiUpload, FiDownload, FiTrash2, FiChevronDown, FiChevronUp, FiMenu } from "react-icons/fi";
 import plyToSplat from "../tools/plyToSplat";
 
 // Define the interface for custom props
@@ -17,28 +17,36 @@ interface LoadSaveExportMenuProps {
 }
 
 // Styled Components
-
-const MenuContainer = styled.div<{ isDraggingDisabled: boolean }>`
+const MenuContainer = styled.div`
   position: absolute;
   top: 10px;
   left: 10px;
-  background-color: #1e1e1e; /* Dark background */
-  padding: 16px; /* Consistent padding */
+  background-color: #1e1e1e;
   border-radius: 8px;
-  color: #ffffff; /* Light text */
+  color: #ffffff;
   z-index: 1000;
-  cursor: ${({ isDraggingDisabled }) => (isDraggingDisabled ? "not-allowed" : "move")};
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  width: 280px; /* Consistent width */
+  width: 280px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  transition: background-color 0.3s ease, cursor 0.3s ease;
 
   @media (max-width: 480px) {
     width: 90%;
     left: 5%;
-    padding: 12px;
   }
 `;
+
+// Create a new DraggableHeader component
+const DraggableHeader = styled.div<{ isOpen: boolean }>`
+  padding: 16px;
+  background-color: #2c2c2c;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: ${({ isOpen }) => (isOpen ? "0" : "8px")};
+  border-bottom-left-radius: ${({ isOpen }) => (isOpen ? "0" : "8px")};
+  transition: border-radius 0.3s ease;
+  cursor: move;
+`;
+
 
 const Header = styled.div`
   display: flex;
@@ -203,6 +211,25 @@ const SmallButton = styled(Button)`
   margin-bottom: 4px;
 `;
 
+const CollapsibleMenuContainer = styled.div<{ isOpen: boolean }>`
+  max-height: ${({ isOpen }) => (isOpen ? "1000px" : "0px")};
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+`;
+
+const MainHeader = styled.div<{ isOpen: boolean }>`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: ${({ isOpen }) => (isOpen ? "0" : "0")};
+`;
+const MainTitle = styled.h3`
+  margin: 0;
+  font-size: 18px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+`;
 
 // Main Component
 
@@ -223,7 +250,6 @@ const LoadSaveExportMenu: React.FC<LoadSaveExportMenuProps> = ({
     "gs_Plants.splat",
     "gs_Fire_Pit.splat",
   ];
-  //model names
   const modelNames = [
     "Sqwakers",
     "Skull",
@@ -242,124 +268,121 @@ const LoadSaveExportMenu: React.FC<LoadSaveExportMenuProps> = ({
     resetSettings();
   };
 
-  // Internal state to manage draggable behavior
   const [isDraggingDisabled, setIsDraggingDisabled] = React.useState<boolean>(false);
   const [isDefaultSplatsOpen, setIsDefaultSplatsOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
 
-  // Handlers to disable dragging when interacting with inputs
   const handleFocus = () => setIsDraggingDisabled(true);
   const handleBlur = () => setIsDraggingDisabled(false);
 
-
   const handlePlyFileConvert = (event: React.ChangeEvent<HTMLInputElement>) => {
     if(event.target.files){
-      plyToSplat([event.target.files[0]]); // Pass File array
+      plyToSplat([event.target.files[0]]);
     }
   };
 
   return (
-    <Draggable handle=".handle" disabled={isDraggingDisabled}>
-      <MenuContainer className="handle" isDraggingDisabled={isDraggingDisabled}>
-        <SectionTitle>
-          <FiFolder size={18} style={{ marginRight: "8px" }} /> Load Splats
-        </SectionTitle>
+    <Draggable handle=".handle">
+      <MenuContainer>
+        <DraggableHeader isOpen={isMenuOpen} className="handle">
+          <MainHeader isOpen={isMenuOpen}>
+            <MainTitle>
+              <FiMenu size={18} style={{ marginRight: "8px" }} />
+              Load / Save Menu
+            </MainTitle>
+            <ToggleButton onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              {isMenuOpen ? <FiChevronUp /> : <FiChevronDown />}
+            </ToggleButton>
+          </MainHeader>
+        </DraggableHeader>
+        <CollapsibleMenuContainer isOpen={isMenuOpen}>
+          <div style={{ padding: "16px" }}>
+            <SectionTitle>
+              <FiFolder size={18} style={{ marginRight: "8px" }} /> Load Splats
+            </SectionTitle>
 
-  
-
-        <Input
-          type="text"
-          placeholder="Enter custom splat URL"
-          value={customModelUrl}
-          onChange={(e) => setCustomModelUrl(e.target.value)}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-        />
-        <Button
-          variant="success"
-          onClick={() => {
-            if (customModelUrl) {
-              loadModel(customModelUrl);
-            } else {
-              alert("Please enter a valid URL.");
-            }
-          }}
-          onMouseDown={handleFocus}
-          onMouseUp={handleBlur}
-        >
-          <FiUpload size={18} /> Load Custom Splat
-        </Button>
-        {/* Add PLY to Splat Conversion */}
-        <FileInputLabel htmlFor="ply-to-splat-input">
-          Convert PLY to Splat
-        </FileInputLabel>
-        <HiddenFileInput
-          id="ply-to-splat-input"
-          type="file"
-          accept=".ply"
-          onChange={handlePlyFileConvert}
-        />
-
-        <CollapsibleSection>
-          <CollapsibleHeader onClick={() => setIsDefaultSplatsOpen(!isDefaultSplatsOpen)}>
-            {isDefaultSplatsOpen ? <FiChevronUp /> : <FiChevronDown />} Example Splats
-          </CollapsibleHeader>
-          <CollapsibleContent isOpen={isDefaultSplatsOpen}>
-            {models.map((splat, index) => (
-              <SmallButton
-                key={index}
-                variant="secondary"
-                onClick={() => loadModel(baseURL + splat)}
-                onMouseDown={handleFocus}
-                onMouseUp={handleBlur}
-              >
-                {modelNames[index]}
-              </SmallButton>
-            ))}
-          </CollapsibleContent>
-        </CollapsibleSection>
-        <HorizontalLine />
-
-        {/* "Load/Save" Title Below Horizontal Line */}
-        <Header>
-          <Title>
-            <FiFolder size={20} style={{ marginRight: "8px" }} /> Load/Save
-          </Title>
-        </Header>
-
-        {/* Export and Save Section */}
-        <Section>
-          <Button variant="primary" onClick={handleExport}>
-            <FiDownload size={18} /> Export Scene
-          </Button>
-
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
+            <Input
+              type="text"
+              placeholder="Enter custom splat URL"
+              value={customModelUrl}
+              onChange={(e) => setCustomModelUrl(e.target.value)}
+            />
             <Button
               variant="success"
-              style={{ flex: 1 }}
-              onClick={saveToJson}
-              onMouseDown={handleFocus}
-              onMouseUp={handleBlur}
+              onClick={() => {
+                if (customModelUrl) {
+                  loadModel(customModelUrl);
+                } else {
+                  alert("Please enter a valid URL.");
+                }
+              }}
             >
-              <FiSave size={18} /> Save Project
+              <FiUpload size={18} /> Load Custom Splat
             </Button>
-            <FileInputLabel htmlFor="load-json">
-              <FiUpload size={18} /> Load Project
+            <FileInputLabel htmlFor="ply-to-splat-input">
+              Convert PLY to Splat
             </FileInputLabel>
             <HiddenFileInput
-              id="load-json"
+              id="ply-to-splat-input"
               type="file"
-              accept=".json"
-              onChange={loadFromJson}
+              accept=".ply"
+              onChange={handlePlyFileConvert}
             />
+
+            <CollapsibleSection>
+              <CollapsibleHeader onClick={() => setIsDefaultSplatsOpen(!isDefaultSplatsOpen)}>
+                {isDefaultSplatsOpen ? <FiChevronUp /> : <FiChevronDown />} Example Splats
+              </CollapsibleHeader>
+              <CollapsibleContent isOpen={isDefaultSplatsOpen}>
+                {models.map((splat, index) => (
+                  <SmallButton
+                    key={index}
+                    variant="secondary"
+                    onClick={() => loadModel(baseURL + splat)}
+                  >
+                    {modelNames[index]}
+                  </SmallButton>
+                ))}
+              </CollapsibleContent>
+            </CollapsibleSection>
+            <HorizontalLine />
+
+            <Header>
+              <Title>
+                <FiFolder size={20} style={{ marginRight: "8px" }} /> Load/Save
+              </Title>
+            </Header>
+
+            <Section>
+              <Button variant="primary" onClick={handleExport}>
+                <FiDownload size={18} /> Export Scene
+              </Button>
+
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
+                <Button
+                  variant="success"
+                  style={{ flex: 1 }}
+                  onClick={saveToJson}
+                >
+                  <FiSave size={18} /> Save Project
+                </Button>
+                <FileInputLabel htmlFor="load-json">
+                  <FiUpload size={18} /> Load Project
+                </FileInputLabel>
+                <HiddenFileInput
+                  id="load-json"
+                  type="file"
+                  accept=".json"
+                  onChange={loadFromJson}
+                />
+              </div>
+            </Section>
+
+            <Button variant="danger" onClick={handleClear}>
+              <FiTrash2 size={18} /> Reset All
+            </Button>
           </div>
-        </Section>
-
-        {/* Reset Section */}
-
-        <Button variant="danger" onClick={handleClear}>
-          <FiTrash2 size={18} /> Reset All
-        </Button>
-
+        </CollapsibleMenuContainer>
       </MenuContainer>
     </Draggable>
   );
