@@ -1,4 +1,3 @@
-// loadModelFile.ts
 import * as BABYLON from "@babylonjs/core";
 import addTooltipToMesh from "./AddToolTipToMesh";
 
@@ -64,6 +63,48 @@ const loadModelFile = async (
        // addTooltipToMesh(mesh, 'tooltip', scene);
       }
     });
+
+    // Frame new mesh in camera
+    const camera = scene.activeCamera as BABYLON.FreeCamera;
+    let target = newMeshes[0];
+    let scaleFactor = .5;
+
+    //Helper function to calculate the distance needed to frame the target
+    const frameTarget = (target: BABYLON.AbstractMesh, camera: BABYLON.FreeCamera, scaleFactor: number) =>{
+        let bbInfo = target.getBoundingInfo();
+        let box = bbInfo.boundingBox;
+        let minX = Number.POSITIVE_INFINITY;
+        let maxX = Number.NEGATIVE_INFINITY;
+        let minY = Number.POSITIVE_INFINITY;
+        let maxY = Number.NEGATIVE_INFINITY;
+        let minZ = Number.POSITIVE_INFINITY;
+        let maxZ = Number.NEGATIVE_INFINITY;
+        let maxDistance = Number.NEGATIVE_INFINITY;
+        let targetPosition = target.position.clone();
+        let vectors = box.vectorsWorld;
+        vectors.forEach((v) => {
+          minX = Math.min(minX, v.x - targetPosition.x);
+          maxX = Math.max(maxX, v.x - targetPosition.x);
+          minY = Math.min(minY, v.y - targetPosition.y);
+          maxY = Math.max(maxY, v.y - targetPosition.y);
+          minZ = Math.min(minZ, v.z - targetPosition.z);
+          maxZ = Math.max(maxZ, v.z - targetPosition.z);
+          let md0 = Math.pow(Math.pow(maxX - minX, 2) + Math.pow(maxY - minY, 2), 0.5);
+          let md1 = Math.pow(Math.pow(maxX - minX, 2) + Math.pow(maxZ - minZ, 2), 0.5);
+          let md2 = Math.pow(Math.pow(maxY - minY, 2) + Math.pow(maxZ - minZ, 2), 0.5);
+          maxDistance = Math.max(maxDistance, Math.max(md0, Math.max(md1, md2)));
+        });
+
+        let fov = camera.fov;
+        let scale = Math.min(Math.max(((maxDistance / Math.tan(fov * 0.5)) * scaleFactor), camera.minZ * 2), camera.maxZ * 0.8);
+        let normal = camera.getForwardRay(1).direction;
+        camera.position = normal.scale(-scale).add(targetPosition);
+    }
+
+    if (camera) {
+        frameTarget(target, camera, scaleFactor)
+    }
+
 
     // Hide the info text
     if (infoTextRef.current) infoTextRef.current.style.display = "none";

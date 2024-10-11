@@ -27,7 +27,7 @@ const HotspotManager = forwardRef<unknown, HotspotManagerProps>(({ scene, camera
   const [isAddingHotspot, setIsAddingHotspot] = useState(false);
   const [selectedHotspot, setSelectedHotspot] = useState<Hotspot | null>(null);
   const [displayedHotspot, setDisplayedHotspot] = useState<Hotspot | null>(null);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const gizmoManagerRef = useRef<BABYLON.GizmoManager | null>(null);
 
@@ -201,7 +201,7 @@ const HotspotManager = forwardRef<unknown, HotspotManagerProps>(({ scene, camera
           transition: 'max-width 0.3s ease-in-out',
           boxShadow: '0 0 10px rgba(0,0,0,0.5)',
         }}>
-          <div className="handle" style={{ cursor: 'move', padding: '10px', backgroundColor: 'rgba(255, 255, 255, 0.1)', marginBottom: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '5px' }}>
+          <div className="handle" style={{ cursor: 'move', padding: '10px', backgroundColor: 'rgba(255, 255, 255, 0.1)', marginBottom: '0px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '5px' }}>
             <span>Hotspot Manager</span>
             <button onClick={toggleCollapse} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '16px' }}>
               {isCollapsed ? '▼' : '▲'}
@@ -209,11 +209,11 @@ const HotspotManager = forwardRef<unknown, HotspotManagerProps>(({ scene, camera
           </div>
           {!isCollapsed && (
             <>
-              <button onClick={addHotspot} disabled={isAddingHotspot} style={{ width: '100%', padding: '10px', marginBottom: '15px', backgroundColor: '#4CAF50', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '5px' }}>
+              <button onClick={addHotspot} disabled={isAddingHotspot} style={{ width: '100%', padding: '10px', marginBottom: '15px', marginTop: '15px', backgroundColor: '#4CAF50', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '5px' }}>
                 {isAddingHotspot ? 'Click in the scene to place hotspot' : 'Add Hotspot'}
               </button>
               <div style={{ marginBottom: '15px' }}>
-                <h3 style={{ marginBottom: '10px' }}>Hotspot List</h3>
+                <h3 style={{ marginBottom: '10px', marginTop: '10px' }}>Hotspot List</h3>
                 {hotspots.map((hotspot) => (
                   <div key={hotspot.id} style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '8px', borderRadius: '5px' }}>
                     <span>{hotspot.title}</span>

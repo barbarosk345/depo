@@ -83,43 +83,7 @@ const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const infoTextRef = useRef<HTMLDivElement | null>(null);
 
-  const [waypoints, setWaypoints] = useState<Waypoint[]>([
-    {
-      x: 0,
-      y: 0,
-      z: -10,
-      rotation: BABYLON.Quaternion.FromEulerAngles(0, 0, 0).normalize(),
-      interactions: [],
-    },
-    {
-      x: 0,
-      y: 0,
-      z: -8,
-      rotation: BABYLON.Quaternion.FromEulerAngles(0, 0.1, 0).normalize(),
-      interactions: [],
-    },
-    {
-      x: 0,
-      y: 0,
-      z: -6,
-      rotation: BABYLON.Quaternion.FromEulerAngles(0, 0.2, 0).normalize(),
-      interactions: [],
-    },
-    {
-      x: 0,
-      y: 0,
-      z: -4,
-      rotation: BABYLON.Quaternion.FromEulerAngles(0, 0.3, 0).normalize(),
-      interactions: [],
-    },
-    {
-      x: 0,
-      y: 0,
-      z: -2,
-      rotation: BABYLON.Quaternion.FromEulerAngles(0, 0.4, 0).normalize(),
-      interactions: [],
-    },
-  ]);
+  const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
 
   const [loadedModelUrl, setLoadedModelUrl] = useState<string | null>(null);
   const [scrollSpeed, setScrollSpeed] = useState<number>(DEFAULT_SETTINGS.scrollSpeed);
@@ -161,7 +125,7 @@ const App: React.FC = () => {
   }>({});
   const loadedMeshesRef = useRef<BABYLON.AbstractMesh[]>([]);
   const activeWaypointsRef = useRef<Set<number>>(new Set());
-  const targetRotationRef = useRef<BABYLON.Quaternion>(waypoints[0].rotation.clone());
+  const targetRotationRef = useRef<BABYLON.Quaternion>(BABYLON.Quaternion.Identity());
   const waypointsRef = useRef<Waypoint[]>(waypoints);
 
 
@@ -174,43 +138,7 @@ const App: React.FC = () => {
     setCustomModelUrl("");
     setLoadedModelUrl(null);
     setIsModelLocal(false);
-    setWaypoints([
-      {
-        x: 0,
-        y: 0,
-        z: -10,
-        rotation: BABYLON.Quaternion.FromEulerAngles(0, 0, 0).normalize(),
-        interactions: [],
-      },
-      {
-        x: 0,
-        y: 0,
-        z: -8,
-        rotation: BABYLON.Quaternion.FromEulerAngles(0, 0.1, 0).normalize(),
-        interactions: [],
-      },
-      {
-        x: 0,
-        y: 0,
-        z: -6,
-        rotation: BABYLON.Quaternion.FromEulerAngles(0, 0.2, 0).normalize(),
-        interactions: [],
-      },
-      {
-        x: 0,
-        y: 0,
-        z: -4,
-        rotation: BABYLON.Quaternion.FromEulerAngles(0, 0.3, 0).normalize(),
-        interactions: [],
-      },
-      {
-        x: 0,
-        y: 0,
-        z: -2,
-        rotation: BABYLON.Quaternion.FromEulerAngles(0, 0.4, 0).normalize(),
-        interactions: [],
-      },
-    ]);
+    setWaypoints([]);
   };
 
   const adjustScroll = (direction: number) => {
@@ -326,7 +254,7 @@ const App: React.FC = () => {
 
     const camera = new BABYLON.UniversalCamera(
       "camera",
-      new BABYLON.Vector3(waypoints[0].x, waypoints[0].y, waypoints[0].z),
+      new BABYLON.Vector3(0, 10, 0),
       scene
     );
     cameraRef.current = camera;
@@ -337,7 +265,7 @@ const App: React.FC = () => {
 
 
     // Initialize rotationQuaternion with the first waypoint's rotation
-    camera.rotationQuaternion = waypoints[0].rotation.clone();
+    camera.rotationQuaternion = BABYLON.Quaternion.Identity();
 
     // Optionally, set the Euler rotation to match (if needed)
     // camera.rotation = camera.rotationQuaternion.toEulerAngles();

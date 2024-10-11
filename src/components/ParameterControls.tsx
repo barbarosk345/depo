@@ -132,7 +132,7 @@ const ParameterControls: React.FC<ParameterControlsProps> = ({
         <Header>
           <Title>
             <FiSettings style={{ marginRight: "8px" }} />
-            Adjust Parameters
+            Settings
           </Title>
           <ToggleButton
             onClick={() => setShowControls(!showControls)}

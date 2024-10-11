@@ -3,6 +3,7 @@ import Draggable from "react-draggable";
 import * as BABYLON from "@babylonjs/core";
 import { Waypoint, Interaction } from "../App";
 import InteractionEditor from "./InteractionEditor";
+import { FiCamera } from "react-icons/fi";
 
 type WaypointControlsProps = {
   waypoints: Waypoint[];
@@ -23,14 +24,13 @@ const WaypointControls: React.FC<WaypointControlsProps> = ({
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [collapsedWaypoints, setCollapsedWaypoints] = useState<Set<number>>(new Set());
 
-  // Initialize collapsedWaypoints to include all waypoints (collapsed by default)
   useEffect(() => {
     setCollapsedWaypoints(new Set(waypoints.map((_, index) => index)));
   }, [waypoints.length]);
 
   const getQuaternionFromRotation = (rotation: any): BABYLON.Quaternion => {
     if (rotation instanceof BABYLON.Quaternion) {
-      return rotation.clone(); // Ensure a unique instance
+      return rotation.clone();
     } else if (rotation && typeof rotation === 'object' && 'x' in rotation && 'y' in rotation && 'z' in rotation && 'w' in rotation) {
       return new BABYLON.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
     } else {
@@ -68,18 +68,16 @@ const WaypointControls: React.FC<WaypointControlsProps> = ({
       x: cameraPosition ? cameraPosition.x : 0,
       y: cameraPosition ? cameraPosition.y : 0,
       z: cameraPosition ? cameraPosition.z : 0,
-      rotation: cameraRotation ? cameraRotation.clone() : BABYLON.Quaternion.Identity(), // Clone the Quaternion
+      rotation: cameraRotation ? cameraRotation.clone() : BABYLON.Quaternion.Identity(),
       interactions: [],
     };
     setWaypoints([...waypoints, newWaypoint]);
-    // Automatically collapse the new waypoint's coordinates
     setCollapsedWaypoints(prev => new Set(prev).add(waypoints.length));
   };
 
   const removeWaypoint = (index: number) => {
     const newWaypoints = waypoints.filter((_, i) => i !== index);
     setWaypoints(newWaypoints);
-    // Update collapsedWaypoints by removing the deleted index and adjusting subsequent indices
     setCollapsedWaypoints(prev => {
       const newSet = new Set<number>();
       newWaypoints.forEach((_, i) => {
@@ -122,6 +120,21 @@ const WaypointControls: React.FC<WaypointControlsProps> = ({
     });
   };
 
+  const updateWaypointToCurrentCamera = (index: number) => {
+    const camera = scene?.activeCamera;
+    if (camera) {
+      const newWaypoints = [...waypoints];
+      newWaypoints[index] = {
+        ...newWaypoints[index],
+        x: camera.position.x,
+        y: camera.position.y,
+        z: camera.position.z,
+        rotation: camera.absoluteRotation.clone(),
+      };
+      setWaypoints(newWaypoints);
+    }
+  };
+
   return (
     <>
       <Draggable handle=".handle">
@@ -129,13 +142,12 @@ const WaypointControls: React.FC<WaypointControlsProps> = ({
           className="handle"
           style={{
             position: "absolute",
-            bottom: "50px",
+            bottom: "120px",
             right: "10px",
             backgroundColor: "rgba(0,0,0,0.7)",
             borderRadius: "5px",
             color: "white",
             zIndex: 10,
-            // Removed fixed width to allow responsiveness
             boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
             cursor: "move",
             overflow: "hidden",
@@ -218,11 +230,29 @@ const WaypointControls: React.FC<WaypointControlsProps> = ({
                   <span style={{ 
                     fontSize: "14px", 
                     color: "#ddd",
-                    marginRight: "10px" // Added margin to the right
+                    marginRight: "10px"
                   }}>
                     Waypoint {index + 1}
                   </span>
                   <div>
+                    <button
+                      onClick={() => updateWaypointToCurrentCamera(index)}
+                      style={{
+                        marginRight: "5px",
+                        padding: "3px 6px",
+                        backgroundColor: "#007BFF",
+                        color: "white",
+                        border: "none",
+                        cursor: "pointer",
+                        borderRadius: "3px",
+                        fontSize: "11px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                      }}
+                      title="Update to current camera position and rotation"
+                    >
+                      <FiCamera style={{ marginRight: "2px" }} />
+                    </button>
                     <button
                       onClick={() => setEditingWaypointIndex(index)}
                       style={{
@@ -238,22 +268,20 @@ const WaypointControls: React.FC<WaypointControlsProps> = ({
                     >
                       Edit Interactions
                     </button>
-                    {waypoints.length > 1 && (
-                      <button
-                        onClick={() => removeWaypoint(index)}
-                        style={{
-                          padding: "3px 6px",
-                          backgroundColor: "#dc3545",
-                          color: "white",
-                          border: "none",
-                          cursor: "pointer",
-                          borderRadius: "3px",
-                          fontSize: "11px",
-                        }}
-                      >
-                        Delete
-                      </button>
-                    )}
+                    <button
+                      onClick={() => removeWaypoint(index)}
+                      style={{
+                        padding: "3px 6px",
+                        backgroundColor: "#dc3545",
+                        color: "white",
+                        border: "none",
+                        cursor: "pointer",
+                        borderRadius: "3px",
+                        fontSize: "11px",
+                      }}
+                    >
+                      Delete
+                    </button>
                     <button
                       onClick={() => toggleWaypointCollapse(index)}
                       style={{

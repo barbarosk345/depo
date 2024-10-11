@@ -1,9 +1,8 @@
-// LoadSaveExportMenu.tsx
-import React from "react";
+import React, { useState } from "react";
 import Draggable from "react-draggable";
 import styled from "styled-components";
-import { FiFolder, FiSave, FiUpload, FiDownload, FiTrash2 } from "react-icons/fi"; // Corrected Icon
-import plyToSplat from "../tools/plyToSplat"; // Import the function
+import { FiFolder, FiSave, FiUpload, FiDownload, FiTrash2, FiChevronDown, FiChevronUp } from "react-icons/fi";
+import plyToSplat from "../tools/plyToSplat";
 
 // Define the interface for custom props
 interface LoadSaveExportMenuProps {
@@ -181,6 +180,30 @@ const HorizontalLine = styled.hr`
   margin: 16px 0;
 `;
 
+const CollapsibleSection = styled.div`
+  margin-top: 8px;
+`;
+
+const CollapsibleHeader = styled.div`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px 0;
+  color: #ffffff;
+`;
+
+const CollapsibleContent = styled.div<{ isOpen: boolean }>`
+  display: ${({ isOpen }) => (isOpen ? 'block' : 'none')};
+`;
+
+const SmallButton = styled(Button)`
+  padding: 4px 8px;
+  font-size: 12px;
+  height: auto;
+  margin-bottom: 4px;
+`;
+
+
 // Main Component
 
 const LoadSaveExportMenu: React.FC<LoadSaveExportMenuProps> = ({
@@ -200,6 +223,13 @@ const LoadSaveExportMenu: React.FC<LoadSaveExportMenuProps> = ({
     "gs_Plants.splat",
     "gs_Fire_Pit.splat",
   ];
+  //model names
+  const modelNames = [
+    "Sqwakers",
+    "Skull",
+    "Plants",
+    "Fire Pit",
+  ];
 
   const loadModel = (url: string) => {
     setLoadedModelUrl(url);
@@ -214,6 +244,7 @@ const LoadSaveExportMenu: React.FC<LoadSaveExportMenuProps> = ({
 
   // Internal state to manage draggable behavior
   const [isDraggingDisabled, setIsDraggingDisabled] = React.useState<boolean>(false);
+  const [isDefaultSplatsOpen, setIsDefaultSplatsOpen] = useState(false);
 
   // Handlers to disable dragging when interacting with inputs
   const handleFocus = () => setIsDraggingDisabled(true);
@@ -229,24 +260,11 @@ const LoadSaveExportMenu: React.FC<LoadSaveExportMenuProps> = ({
   return (
     <Draggable handle=".handle" disabled={isDraggingDisabled}>
       <MenuContainer className="handle" isDraggingDisabled={isDraggingDisabled}>
-
-        {/* Load Splats Section */}
-
         <SectionTitle>
           <FiFolder size={18} style={{ marginRight: "8px" }} /> Load Splats
         </SectionTitle>
-        {models.map((splat, index) => (
-          <Button
-            key={index}
-            variant="secondary"
-            onClick={() => loadModel(baseURL + splat)}
-            onMouseDown={handleFocus}
-            onMouseUp={handleBlur}
-            style={{ padding: "6px 10px" }} // Slightly shorter buttons
-          >
-            {splat}
-          </Button>
-        ))}
+
+  
 
         <Input
           type="text"
@@ -270,7 +288,6 @@ const LoadSaveExportMenu: React.FC<LoadSaveExportMenuProps> = ({
         >
           <FiUpload size={18} /> Load Custom Splat
         </Button>
-
         {/* Add PLY to Splat Conversion */}
         <FileInputLabel htmlFor="ply-to-splat-input">
           Convert PLY to Splat
@@ -282,7 +299,24 @@ const LoadSaveExportMenu: React.FC<LoadSaveExportMenuProps> = ({
           onChange={handlePlyFileConvert}
         />
 
-
+        <CollapsibleSection>
+          <CollapsibleHeader onClick={() => setIsDefaultSplatsOpen(!isDefaultSplatsOpen)}>
+            {isDefaultSplatsOpen ? <FiChevronUp /> : <FiChevronDown />} Example Splats
+          </CollapsibleHeader>
+          <CollapsibleContent isOpen={isDefaultSplatsOpen}>
+            {models.map((splat, index) => (
+              <SmallButton
+                key={index}
+                variant="secondary"
+                onClick={() => loadModel(baseURL + splat)}
+                onMouseDown={handleFocus}
+                onMouseUp={handleBlur}
+              >
+                {modelNames[index]}
+              </SmallButton>
+            ))}
+          </CollapsibleContent>
+        </CollapsibleSection>
         <HorizontalLine />
 
         {/* "Load/Save" Title Below Horizontal Line */}
