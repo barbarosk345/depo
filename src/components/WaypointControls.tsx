@@ -142,8 +142,8 @@ const WaypointControls: React.FC<WaypointControlsProps> = ({
           className="handle"
           style={{
             position: "absolute",
-            bottom: "120px",
-            right: "10px",
+            top: "10px",
+            right: "300px",
             backgroundColor: "rgba(0,0,0,0.7)",
             borderRadius: "5px",
             color: "white",

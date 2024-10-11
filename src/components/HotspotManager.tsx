@@ -186,8 +186,8 @@ const HotspotManager = forwardRef<unknown, HotspotManagerProps>(({ scene, camera
       <Draggable handle=".handle">
         <div style={{
           position: 'absolute',
-          top: '10px',
-          right: '300px',
+          bottom: '10px',
+          right: '120px',
           transform: 'translateY(-50%)',
           backgroundColor: 'rgba(0, 0, 0, 0.7)',
           color: 'white',
