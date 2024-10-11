@@ -142,7 +142,7 @@ const App: React.FC = () => {
   const freeFlyEnabledRef = useRef(false);
 
   const [cameraConstraintMode, setCameraConstraintMode] = useState<'auto' | 'path' >('path');
-  const [freeFlyEnabled, setFreeFlyEnabled] = useState(true);
+  const [freeFlyEnabled, setFreeFlyEnabled] = useState(false);
 
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
