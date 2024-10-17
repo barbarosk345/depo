@@ -1,4 +1,3 @@
-// tools/WheelHandler.ts
 import * as BABYLON from "@babylonjs/core";
 import { MutableRefObject } from "react";
 
@@ -15,66 +14,25 @@ export const wheelHandler = (
   scrollTargetRef: MutableRefObject<number>,
   scrollPositionRef: MutableRefObject<number>,
   isEditMode: boolean,
-  cameraConstraintMode: 'auto' | 'path',
-  freeFlyEnabled: boolean,
-  toggleFreeFly: () => void, // Added toggle function
+  cameraMode: 'tour' | 'explore' | 'auto',
 ) => {
   if (animatingToPathRef.current) return;
   if (isEditMode) return;
 
   if (
-    (cameraConstraintMode === 'auto' && userControlRef.current) ||
-    (cameraConstraintMode === 'path' && !freeFlyEnabled && userControlRef.current)
+    (cameraMode === 'auto' && userControlRef.current) ||
+    (cameraMode === 'tour' && userControlRef.current)
   ) {
     animatingToPathRef.current = true;
     userControlRef.current = false;
 
-    // Helper function to find the closest point on the path
-    function getClosestPointOnPath(
-      position: BABYLON.Vector3,
-      path: BABYLON.Vector3[]
-    ) {
-      let minDist = Infinity;
-      let closestIndex = 0;
-      let closestPoint = path[0] || new BABYLON.Vector3(0, 0, 0);
+    // Use the current scroll position instead of finding the closest point
+    const targetT = scrollPositionRef.current;
+    const pathLength = pathRef.current.length - 1;
 
-      for (let i = 0; i < path.length; i++) {
-        const dist = BABYLON.Vector3.DistanceSquared(position, path[i]);
-        if (dist < minDist) {
-          minDist = dist;
-          closestIndex = i;
-          closestPoint = path[i];
-        }
-      }
-
-      return { index: closestIndex, closestPoint, distanceSquared: minDist };
-    }
-
-    const closestPointInfo = getClosestPointOnPath(camera.position, pathRef.current);
-    const startIndex = closestPointInfo.index;
-    const startPoint = closestPointInfo.closestPoint;
-
-    // Preserve the fractional part of the scroll position
-    // Calculate how far along the segment the camera is
-    let fractionalScroll = 0;
-    if (startIndex < pathRef.current.length - 1) {
-      const segmentVector = pathRef.current[startIndex + 1].subtract(pathRef.current[startIndex]);
-      const cameraVector = camera.position.subtract(pathRef.current[startIndex]);
-      const segmentLengthSquared = segmentVector.lengthSquared();
-      if (segmentLengthSquared > 0) {
-        fractionalScroll = BABYLON.Vector3.Dot(cameraVector, segmentVector) / segmentLengthSquared;
-        fractionalScroll = Math.min(Math.max(fractionalScroll, 0), 1);
-      }
-    }
-
-    const targetScroll = startIndex + fractionalScroll;
-    scrollPositionRef.current = targetScroll;
-    scrollTargetRef.current = targetScroll;
-
-    // Calculate target position and rotation based on current scroll position
-    const targetT = targetScroll;
+    // Calculate target position based on current scroll position
     const floorIndex = Math.floor(targetT);
-    const ceilIndex = Math.min(floorIndex + 1, pathRef.current.length - 1);
+    const ceilIndex = Math.min(floorIndex + 1, pathLength);
     const lerpFactor = targetT - floorIndex;
 
     const targetPosition = BABYLON.Vector3.Lerp(
@@ -87,7 +45,7 @@ export const wheelHandler = (
     let targetRotation: BABYLON.Quaternion;
     if (rotations.length >= 2 && pathRef.current.length >= 2) {
       const totalSegments = waypoints.length - 1;
-      const segmentT = (targetT / (pathRef.current.length - 1)) * totalSegments;
+      const segmentT = (targetT / pathLength) * totalSegments;
       const segmentIndex = Math.floor(segmentT);
       const clampedSegmentIndex = Math.min(segmentIndex, totalSegments - 1);
       const lerpFactorRot = segmentT - clampedSegmentIndex;
@@ -148,7 +106,7 @@ export const wheelHandler = (
       scrollPositionRef.current = targetT;
       scrollTargetRef.current = targetT;
     });
-  } else {
+  } else if (cameraMode !== 'explore') {
     // Adjust scrollTarget based on wheel delta
     scrollTargetRef.current += event.deltaY * scrollSpeed;
 

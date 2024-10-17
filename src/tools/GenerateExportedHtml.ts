@@ -24,8 +24,7 @@ export const generateExportedHTML = (
     activationMode: "click" | "hover";
     color: string;
   }>,
-  cameraConstraintMode: "auto" | "path" = "auto",
-  freeFlyEnabled: boolean = false,
+  defaultCameraMode: "tour" | "explore" | "auto" = "explore",
   cameraDampeningRef: number
 ) => {
   return `
@@ -82,6 +81,40 @@ export const generateExportedHTML = (
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
       display: none;
       font-size: 16px;
+    }
+    #scrollControls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #toggleCameraModeContainer {
+      margin-bottom: 10px;
+    }
+
+    #scrollControlsContent,
+    #exploreControlsContent {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s ease-in-out;
+      width: 100%;
+    }
+
+    #scrollControlsContent.hidden,
+    #exploreControlsContent.hidden {
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+    }
+
+    #exploreControlsContent p {
+      color: white;
+      font-size: 14px;
+      text-align: center;
+      margin: 0;
     }
     ${
       includeScrollControls
@@ -239,8 +272,8 @@ export const generateExportedHTML = (
         : ""
     }
 
-    /* Ensure the toggleFreeFly button has consistent styling */
-    #toggleFreeFly {
+    /* Ensure the toggleCameraMode button has consistent styling */
+    #toggleCameraMode {
       background-color: #4CAF50;
       border: none;
       color: white;
@@ -254,7 +287,7 @@ export const generateExportedHTML = (
       border-radius: 5px;
       transition: background-color 0.3s;
     }
-    #toggleFreeFly:hover {
+    #toggleCameraMode:hover {
       background-color: #45a049;
     }
       
@@ -288,18 +321,24 @@ export const generateExportedHTML = (
     includeScrollControls
       ? `
   <div id="scrollControls">
-    <div id="scrollPercentage">0%</div>
-    <div id="progressBarContainer">
-      <div id="progressBar"></div>
+    <div id="toggleCameraModeContainer">
+      <button id="toggleCameraMode" onclick="toggleCameraMode()">Mode: ${defaultCameraMode.charAt(0).toUpperCase() + defaultCameraMode.slice(1)}</button>
     </div>
-    <div id="scrollButtons">
-      <button class="button" onclick="adjustScroll(-1)">◀ Backward</button>
-      <button class="button" onclick="adjustScroll(1)">Forward ▶</button>
+    <div id="scrollControlsContent">
+      <div id="scrollPercentage">0%</div>
+      <div id="progressBarContainer">
+        <div id="progressBar"></div>
+      </div>
+      <div id="scrollButtons">
+        <button class="button" onclick="adjustScroll(-1)">◀ Backward</button>
+        <button class="button" onclick="adjustScroll(1)">Forward ▶</button>
+      </div>
     </div>
-    <div>
-      ${cameraConstraintMode === "path" ? `<button id="toggleFreeFly" onclick="toggleFreeFly()">Free Fly: ${freeFlyEnabled ? "On" : "Off"}</button>` : ""}
+    <div id="exploreControlsContent">
+      <p>Use WASD to move and mouse to look around</p>
     </div>
   </div>
+
   `
       : ""
   }
@@ -308,29 +347,49 @@ export const generateExportedHTML = (
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
   <script>
-    // Initialize freeFlyEnabled based on the parameter
-    let freeFlyEnabled = ${freeFlyEnabled};
-
-    // Function to toggle Free Fly mode
-    function toggleFreeFly() {
-      freeFlyEnabled = !freeFlyEnabled;
-      const toggleButton = document.getElementById('toggleFreeFly');
-      if (toggleButton) {
-        toggleButton.textContent = 'Free Fly: ' + (freeFlyEnabled ? 'On' : 'Off');
-      }
-      // Additional logic to handle Free Fly mode
-      // For example, enabling/disabling certain camera constraints
-      if (${JSON.stringify(cameraConstraintMode)} === "path") {
-        if (freeFlyEnabled) {
-          // Enable free fly controls
-          userControl = true;
+    // Initialize cameraMode
+    let cameraMode = '${defaultCameraMode}';
+      function updateScrollControlsVisibility() {
+        const scrollControlsContent = document.getElementById('scrollControlsContent');
+        const exploreControlsContent = document.getElementById('exploreControlsContent');
+        if (cameraMode === 'explore') {
+          scrollControlsContent.classList.add('hidden');
+          exploreControlsContent.classList.remove('hidden');
         } else {
-          // Disable free fly controls and revert to path constraints
-          userControl = false;
+          scrollControlsContent.classList.remove('hidden');
+          exploreControlsContent.classList.add('hidden');
         }
       }
-      console.log('Free Fly Enabled:', freeFlyEnabled);
+
+    // Function to toggle camera mode
+    function toggleCameraMode() {
+      switch (cameraMode) {
+        case 'tour':
+          cameraMode = 'explore';
+          break;
+        case 'explore':
+          cameraMode = 'auto';
+          break;
+        case 'auto':
+          cameraMode = 'tour';
+          break;
+      }
+      const toggleButton = document.getElementById('toggleCameraMode');
+      if (toggleButton) {
+        toggleButton.textContent = 'Mode: ' + cameraMode.charAt(0).toUpperCase() + cameraMode.slice(1);
+      }
+      // Additional logic to handle camera mode change
+      if (cameraMode === 'tour') {
+        userControl = false;
+      } else if (cameraMode === 'explore') {
+        userControl = true;
+      }
+      // For 'auto' mode, userControl will be dynamically updated based on user interactions
+      updateScrollControlsVisibility();
+      console.log('Camera Mode:', cameraMode);
     }
+
+    updateScrollControlsVisibility();
 
     const preloader = document.getElementById('preloader');
     // Get the canvas element
@@ -379,7 +438,7 @@ export const generateExportedHTML = (
     new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
 
     // Variables to manage camera control state
-    let userControl = false;
+    let userControl = cameraMode === 'explore';
     let animatingToPath = false;
 
     // Variables for scroll position and target
@@ -630,8 +689,7 @@ export const generateExportedHTML = (
 
     // Function to adjust scroll
     function adjustScroll(direction) {
-      // Prevent scroll adjustment when Free Fly is enabled in path mode
-      if (${JSON.stringify(cameraConstraintMode)} === "path" && freeFlyEnabled) {
+      if (cameraMode === 'explore') {
         return;
       }
       const increment = 10;
@@ -652,8 +710,8 @@ export const generateExportedHTML = (
       if (animatingToPath) return;
 
       if (
-        (${JSON.stringify(cameraConstraintMode)} === "auto" && userControl) ||
-        (${JSON.stringify(cameraConstraintMode)} === "path" && !freeFlyEnabled && userControl)
+        (cameraMode === 'auto' && userControl) ||
+        (cameraMode === 'tour' && userControl)
       ) {
         animatingToPath = true;
         userControl = false;
@@ -667,23 +725,31 @@ export const generateExportedHTML = (
           camera.rotation.set(0, 0, 0);
         }
 
-        const closestPointInfo = getClosestPointOnPath(camera.position, path);
-        const startIndex = closestPointInfo.index;
+        // Use current scroll position instead of finding closest point
+        const targetT = scrollPosition;
+        const pathLength = path.length - 1;
 
-        const targetPosition = path[startIndex];
+        const floorIndex = Math.floor(targetT);
+        const ceilIndex = Math.min(floorIndex + 1, pathLength);
+        const lerpFactor = targetT - floorIndex;
+
+        const targetPosition = BABYLON.Vector3.Lerp(
+          path[floorIndex],
+          path[ceilIndex],
+          lerpFactor
+        );
 
         let targetRotation = camera.rotationQuaternion.clone();
         if (rotations.length >= 2 && path.length >= 2) {
-          const t = startIndex / (path.length - 1);
           const totalSegments = waypoints.length - 1;
-          const segmentT = t * totalSegments;
+          const segmentT = (targetT / pathLength) * totalSegments;
           const segmentIndex = Math.floor(segmentT);
           const clampedSegmentIndex = Math.min(segmentIndex, totalSegments - 1);
-          const lerpFactor = segmentT - clampedSegmentIndex;
+          const lerpFactorRot = segmentT - clampedSegmentIndex;
 
           const r1 = rotations[clampedSegmentIndex];
           const r2 = rotations[clampedSegmentIndex + 1] || rotations[rotations.length - 1];
-          targetRotation = BABYLON.Quaternion.Slerp(r1, r2, lerpFactor).normalize();
+          targetRotation = BABYLON.Quaternion.Slerp(r1, r2, lerpFactorRot).normalize();
         } else if (rotations.length === 1) {
           targetRotation = rotations[0];
         }
@@ -728,35 +794,16 @@ export const generateExportedHTML = (
 
         scene.beginAnimation(camera, 0, ${animationFrames}, false, 1, function () {
           animatingToPath = false;
-          scrollPosition = startIndex;
-          scrollTarget = scrollPosition;
+          scrollPosition = targetT;
+          scrollTarget = targetT;
         });
-      } else {
-        // Prevent updating scroll when Free Fly is enabled in path mode
-        if (!(${JSON.stringify(cameraConstraintMode)} === "path" && freeFlyEnabled)) {
-          scrollTarget += event.deltaY * ${scrollSpeed};
+      } else if (cameraMode !== 'explore') {
+        scrollTarget += event.deltaY * ${scrollSpeed};
 
-          if (scrollTarget < 0) scrollTarget = 0;
-          if (scrollTarget > path.length - 1) scrollTarget = path.length - 1;
-        }
+        if (scrollTarget < 0) scrollTarget = 0;
+        if (scrollTarget > path.length - 1) scrollTarget = path.length - 1;
       }
     });
-
-    // Helper function to find the closest point on the path
-    function getClosestPointOnPath(position, path) {
-      let minDist = Infinity;
-      let closestIndex = 0;
-
-      for (let i = 0; i < path.length; i++) {
-        const dist = BABYLON.Vector3.DistanceSquared(position, path[i]);
-        if (dist < minDist) {
-          minDist = dist;
-          closestIndex = i;
-        }
-      }
-
-      return { index: closestIndex, distanceSquared: minDist };
-    }
 
     // Initialize target rotation and position
     let targetRotation = camera.rotationQuaternion.clone();
@@ -804,20 +851,19 @@ export const generateExportedHTML = (
       // Calculate scroll percentage
       const scrollPercentage = (scrollPosition / (path.length - 1 || 1)) * 100;
 
-      // Update UI only if not in Free Fly mode
-      if (!(${JSON.stringify(cameraConstraintMode)} === "path" && freeFlyEnabled)) {
+      // Update UI only if not in explore mode
+      if (cameraMode !== 'explore') {
         ${includeScrollControls ? `updateScrollUI(scrollPercentage);` : ""}
       }
 
       // Determine if camera should follow the path
       if (
         (
-          ${JSON.stringify(cameraConstraintMode)} === "auto" && !userControl
+          cameraMode === 'auto' && !userControl
         ) ||
         (
-          ${JSON.stringify(cameraConstraintMode)} === "path" && !freeFlyEnabled && !userControl
-        )
-      ) {
+          cameraMode === 'tour' && !userControl
+       )) {
         const t = scrollPosition / (path.length - 1 || 1);
 
         const totalSegments = waypoints.length - 1;
@@ -855,7 +901,7 @@ export const generateExportedHTML = (
           camera.rotationQuaternion = BABYLON.Quaternion.Slerp(
             camera.rotationQuaternion,
             targetRotation,
-            ${cameraDampeningRef} // Damping factor for rotation (adjust between 0 and 1 for smoothness)
+            ${cameraDampeningRef} // Damping factor for rotation
           ).normalize();
         }
 
@@ -895,7 +941,7 @@ export const generateExportedHTML = (
     // User interaction detection
     scene.onPointerObservable.add(function (evt) {
       if (evt.type === BABYLON.PointerEventTypes.POINTERDOWN) {
-        if (${JSON.stringify(cameraConstraintMode)} === "auto" ||  (${JSON.stringify(cameraConstraintMode)} === "path" && freeFlyEnabled)) {
+        if (cameraMode === 'explore' || cameraMode === 'auto') {
           userControl = true;
         } else {
           userControl = false;
@@ -904,12 +950,11 @@ export const generateExportedHTML = (
     });
 
     window.addEventListener('keydown', function () {
-      if (${JSON.stringify(cameraConstraintMode)} === "auto" ||  (${JSON.stringify(cameraConstraintMode)} === "path" && freeFlyEnabled)) {
+      if (cameraMode === 'explore' || cameraMode === 'auto') {
         userControl = true;
       } else {
         userControl = false;
       }
-
     });
 
     // Mute button functionality

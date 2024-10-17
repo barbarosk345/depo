@@ -85,8 +85,24 @@ const Button = styled.button<{ primary?: boolean }>`
   }
 `;
 
+const Select = styled.select`
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  background-color: #2c2c2c;
+  border: 1px solid #555555;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 14px;
+
+  &:focus {
+    outline: none;
+    border-color: #4CAF50;
+  }
+`;
+
 interface ExportPopupProps {
-  onExport: (modelUrl: string, includeScrollControls: boolean, includeMovementInstructions: boolean) => void;
+  onExport: (modelUrl: string, includeScrollControls: boolean, includeMovementInstructions: boolean, defaultCameraMode: 'tour' | 'explore' | 'auto') => void;
   onCancel: () => void;
   isModelLocal: boolean;
 }
@@ -95,13 +111,14 @@ const ExportPopup: React.FC<ExportPopupProps> = ({ onExport, onCancel, isModelLo
   const [modelUrl, setModelUrl] = useState('');
   const [includeScrollControls, setIncludeScrollControls] = useState(true);
   const [includeMovementInstructions, setIncludeMovementInstructions] = useState(true);
+  const [defaultCameraMode, setDefaultCameraMode] = useState('tour' as 'tour' | 'explore' | 'auto');
 
   const handleExport = () => {
     if (isModelLocal && !modelUrl) {
       alert('Please provide a URL for the model.');
       return;
     }
-    onExport(modelUrl, includeScrollControls, includeMovementInstructions);
+    onExport(modelUrl, includeScrollControls, includeMovementInstructions, defaultCameraMode);
   };
 
   return (
@@ -137,6 +154,14 @@ const ExportPopup: React.FC<ExportPopupProps> = ({ onExport, onCancel, isModelLo
           />
           <CheckboxLabel htmlFor="includeMovementInstructions">Include movement instructions</CheckboxLabel>
         </CheckboxContainer>
+        <Select
+          value={defaultCameraMode}
+          onChange={(e) => setDefaultCameraMode(e.target.value as 'tour' | 'explore' | 'auto')}
+        >
+          <option value="tour">Tour</option>
+          <option value="explore">Explore</option>
+          <option value="auto">Auto</option>
+        </Select>
         <ButtonContainer>
           <Button onClick={onCancel}>Cancel</Button>
           <Button primary onClick={handleExport}>Export</Button>

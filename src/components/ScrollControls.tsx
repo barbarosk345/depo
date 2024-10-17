@@ -1,19 +1,14 @@
-// ScrollControls.tsx
 import React, { useState } from "react";
 import Draggable from "react-draggable";
 import styled from "styled-components";
-import { FiArrowLeft, FiArrowRight , FiCamera, FiCameraOff, FiMap} from "react-icons/fi";
-
-
+import { FiArrowLeft, FiArrowRight, FiCamera, FiMap } from "react-icons/fi";
 interface ScrollControlsProps {
   scrollPercentage: number;
   adjustScroll: (direction: number) => void;
   showScrollControls: boolean;
   setShowScrollControls: React.Dispatch<React.SetStateAction<boolean>>;
-  cameraConstraintMode: 'auto' | 'path' ;
-  setCameraConstraintMode: React.Dispatch<React.SetStateAction<'auto' | 'path' >>;
-  freeFlyEnabled: boolean;
-  setFreeFlyEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  cameraMode: 'tour' | 'explore' | 'auto';
+  setCameraMode: React.Dispatch<React.SetStateAction<'tour' | 'explore' | 'auto'>>;
 }
 
 // Styled Components
@@ -22,14 +17,14 @@ const Handle = styled.div<{ isDraggingDisabled: boolean }>`
   bottom: 10px;
   left: calc(50% - 140px);
   transform: translateY(-50%);
-  background-color: #1e1e1e; /* Dark background */
-  padding: 16px; /* Reduced padding for tighter layout */
+  background-color: #1e1e1e;
+  padding: 16px;
   border-radius: 8px;
-  color: #ffffff; /* Light text */
+  color: #ffffff;
   z-index: 1000;
   cursor: ${({ isDraggingDisabled }) => (isDraggingDisabled ? "not-allowed" : "move")};
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  width: 280px; /* Adjusted width */
+  width: 280px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   transition: background-color 0.3s ease, cursor 0.3s ease;
 
@@ -62,22 +57,28 @@ const ToggleButton = styled.button`
   align-items: center;
   outline: none;
   transition: color 0.3s ease;
-    width: 100%;
-    justify-content: center;
+  width: 100%;
+  justify-content: center;
   &:hover {
-    color: #ffa500; /* Orange on hover */
+    color: #ffa500;
   }
 `;
 
-const ControlsContainer = styled.div`
-
-`;
+const ControlsContainer = styled.div``;
 
 const ControlRow = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 10px; /* Reduced margin */
+  margin-bottom: 10px;
   justify-content: space-between;
+  width: 100%;
+`;
+
+const ControlRowCenter = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  justify-content: center;
   width: 100%;
 `;
 
@@ -102,7 +103,7 @@ const Button = styled.button`
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: #ffa500; /* Orange on hover */
+    background-color: #ffa500;
   }
 `;
 
@@ -116,12 +117,10 @@ const ProgressBarContainer = styled.div`
 `;
 
 const ProgressBar = styled.div<{ percentage: number }>`
-  background-color: #ffa500; /* Orange */
+  background-color: #ffa500;
   height: 100%;
   width: ${({ percentage }) => percentage}%;
-  /* Removed transition for immediate update */
 `;
-
 
 const ModeButton = styled(ToggleButton)`
   display: flex;
@@ -150,32 +149,31 @@ const ModeText = styled.span`
   font-size: 14px;
 `;
 
-// Main Component
-
 const ScrollControls: React.FC<ScrollControlsProps> = ({
   scrollPercentage,
   adjustScroll,
   showScrollControls,
   setShowScrollControls,
-  cameraConstraintMode,
-  setCameraConstraintMode,
-  freeFlyEnabled,
-  setFreeFlyEnabled,
+  cameraMode,
+  setCameraMode,
 }) => {
-
   const [isDraggingDisabled, setIsDraggingDisabled] = useState<boolean>(false);
   const handleMouseDown = () => setIsDraggingDisabled(true);
   const handleMouseUp = () => setIsDraggingDisabled(false);
   const handleTouchStart = () => setIsDraggingDisabled(true);
   const handleTouchEnd = () => setIsDraggingDisabled(false);
 
-  const toggleCameraConstraint = () => {
-    setCameraConstraintMode(cameraConstraintMode === 'path' ? 'auto' : 'path');
-    setFreeFlyEnabled(false);
-  };
-
-  const toggleFreeFly = () => {
-    setFreeFlyEnabled(!freeFlyEnabled);
+  const toggleCameraMode = () => {
+    setCameraMode((prevMode) => {
+      switch (prevMode) {
+        case 'tour':
+          return 'explore';
+        case 'explore':
+          return 'auto';
+        case 'auto':
+          return 'tour';
+      }
+    });
   };
 
   return (
@@ -183,54 +181,51 @@ const ScrollControls: React.FC<ScrollControlsProps> = ({
       {showScrollControls && (
         <Draggable handle=".handle" disabled={isDraggingDisabled}>
           <Handle className="handle" isDraggingDisabled={isDraggingDisabled}>
-            <ControlsContainer>
-              <PercentageText>Scroll Position: {Math.round(scrollPercentage)}%</PercentageText>
-              <ProgressBarContainer>
-                <ProgressBar percentage={scrollPercentage} />
-              </ProgressBarContainer>
-
-              <ControlRow>
-                <Button
-                  onMouseDown={handleMouseDown}
-                  onMouseUp={handleMouseUp}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={handleTouchEnd}
-                  onClick={() => adjustScroll(-1)}
-                  aria-label="Scroll Backward"
-                >
-                  <FiArrowLeft style={{ marginRight: "4px" }} />
-                  Backward
-                </Button>
-                <Button
-                  onMouseDown={handleMouseDown}
-                  onMouseUp={handleMouseUp}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={handleTouchEnd}
-                  onClick={() => adjustScroll(1)}
-                  aria-label="Scroll Forward"
-                >
-                  Forward
-                  <FiArrowRight style={{ marginLeft: "4px" }} />
-                </Button>
-              </ControlRow>
-              <ControlRow>
-                <ModeButton onClick={toggleCameraConstraint}>
+          <ControlRowCenter>
+                <ModeButton onClick={toggleCameraMode}>
                   <IconWrapper>
-                    {<FiCamera />}
+                    {cameraMode === 'tour' ? <FiCamera /> : <FiMap />}
                   </IconWrapper>
                   <ModeText>
-                    {cameraConstraintMode === 'path' ? 'Follow Path' : 'Auto'}
+                    Mode: {cameraMode.charAt(0).toUpperCase() + cameraMode.slice(1)}
                   </ModeText>
                 </ModeButton>
-                {cameraConstraintMode === 'path' && (
-                  <ModeButton onClick={toggleFreeFly}>
-                    <ModeText>
-                      {freeFlyEnabled ? 'Free Fly: On' : 'Free Fly: Off'}
-                    </ModeText>
-                  </ModeButton>
-                )}
-              </ControlRow>
-            </ControlsContainer>
+              </ControlRowCenter>
+            { cameraMode === 'auto' || cameraMode === 'tour' ? (
+                <ControlsContainer>
+                <PercentageText>Scroll Position: {Math.round(scrollPercentage)}%</PercentageText>
+                <ProgressBarContainer>
+                  <ProgressBar percentage={scrollPercentage} />
+                </ProgressBarContainer>
+  
+                <ControlRow>
+                  <Button
+                    onMouseDown={handleMouseDown}
+                    onMouseUp={handleMouseUp}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                    onClick={() => adjustScroll(-1)}
+                    aria-label="Scroll Backward"
+                  >
+                    <FiArrowLeft style={{ marginRight: "4px" }} />
+                    Backward
+                  </Button>
+                  <Button
+                    onMouseDown={handleMouseDown}
+                    onMouseUp={handleMouseUp}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                    onClick={() => adjustScroll(1)}
+                    aria-label="Scroll Forward"
+                  >
+                    Forward
+                    <FiArrowRight style={{ marginLeft: "4px" }} />
+                  </Button>
+                </ControlRow>
+              </ControlsContainer>
+  
+            ) : null}
+          
           </Handle>
         </Draggable>
       )}

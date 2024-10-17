@@ -102,8 +102,8 @@ const App: React.FC = () => {
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [showExportPopup, setShowExportPopup] = useState(false);
 
-  const cameraConstraintModeRef = useRef<'auto' | 'path' >('auto');
-  const freeFlyEnabledRef = useRef(false);
+  const [cameraMode, setCameraMode] = useState<'tour' | 'explore' | 'auto'>('explore');
+  const cameraModeRef = useRef<'tour' | 'explore' | 'auto'>('explore');
 
   const cameraDampeningRef = useRef(0.05);
   const [cameraDampening, setCameraDampening] = useState<number>(0.95);
@@ -145,6 +145,11 @@ const App: React.FC = () => {
   };
 
   const adjustScroll = (direction: number) => {
+
+    if(cameraModeRef.current === 'explore') {
+      return;
+    }
+
     const increment = 10;
     const pathLength = pathRef.current.length;
     if (pathLength > 1) {
@@ -226,10 +231,21 @@ const App: React.FC = () => {
   };
 
   useEffect(() => { 
-   
-
     cameraDampeningRef.current = 1 - cameraDampening === 0 ? 0.01 : 1 - cameraDampening;
   }, [cameraDampening]);
+
+  useEffect(() => {
+    cameraModeRef.current = cameraMode;
+
+    if (cameraMode === 'tour') {
+      userControlRef.current = false;
+    } else if (cameraMode === 'explore') {
+      userControlRef.current = true;
+    }
+    // For 'auto' mode, we don't change userControlRef here
+    // as it should dynamically update based on user interactions
+
+  }, [cameraMode]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -369,7 +385,7 @@ const App: React.FC = () => {
 
     const pointerObservable = scene.onPointerObservable.add(function (evt) {
       if (evt.type === BABYLON.PointerEventTypes.POINTERDOWN) {
-        if(cameraConstraintModeRef.current === 'auto' || (cameraConstraintModeRef.current === 'path' && freeFlyEnabledRef.current)){
+        if(cameraModeRef.current === 'explore' || (cameraModeRef.current === 'auto')){
             userControlRef.current = true;
         } else {
           userControlRef.current = false;
@@ -378,7 +394,7 @@ const App: React.FC = () => {
     });
 
     const keydownHandlerInternal = () => {
-      if(cameraConstraintModeRef.current === 'auto' || (cameraConstraintModeRef.current === 'path' && freeFlyEnabledRef.current)){
+      if(cameraModeRef.current === 'explore' || (cameraModeRef.current === 'auto')){
         userControlRef.current = true;
     } else {
       userControlRef.current = false;
@@ -543,25 +559,11 @@ engine.runRenderLoop(function () {
         scrollTargetRef,
         scrollPositionRef,
         isEditMode,
-        cameraConstraintModeRef.current, // Use ref for cameraConstraintMode
-        freeFlyEnabledRef.current,     // Use ref for freeFlyEnabled
-        () => { } // Dummy function for setFreeFlyEnabled - ref handles updates
+        cameraModeRef.current
       );
     }
   }, [waypoints, animationFrames, scrollSpeed, isEditMode]);
 
-  useEffect(() => {
-    cameraConstraintModeRef.current = cameraConstraintMode;
-    freeFlyEnabledRef.current = freeFlyEnabled;
-
-    if (cameraConstraintMode === 'path') {
-      if(!freeFlyEnabled){
-        userControlRef.current = false;
-      }
-    }
-
-
-  }, [cameraConstraintMode, freeFlyEnabled]);
 
   useEffect(() => {
     window.addEventListener("wheel", wheelHandlerLocal);
@@ -665,13 +667,13 @@ engine.runRenderLoop(function () {
     setShowExportPopup(true);
   };
 
-  const handleExportConfirm = (modelUrl: string, includeScrollControls: boolean, includeMovementInstructions: boolean) => {
+  const handleExportConfirm = (modelUrl: string, includeScrollControls: boolean, includeMovementInstructions: boolean, defaultCameraMode: 'tour' | 'explore' | 'auto') => {
     let exportModelUrl = loadedModelUrl || customModelUrl;
-
+  
     if (isModelLocal) {
       exportModelUrl = modelUrl;
     }
-
+  
     const htmlContent = generateExportedHTML(
       exportModelUrl,
       includeScrollControls,
@@ -683,8 +685,7 @@ engine.runRenderLoop(function () {
       scrollSpeed,
       animationFrames,
       hotspots,
-      cameraConstraintMode,
-      freeFlyEnabled,
+      defaultCameraMode,
       cameraDampeningRef.current
     );
 
@@ -847,10 +848,8 @@ engine.runRenderLoop(function () {
         adjustScroll={adjustScroll}
         showScrollControls={showScrollControls}
         setShowScrollControls={setShowScrollControls}
-        cameraConstraintMode={cameraConstraintMode}
-        setCameraConstraintMode={setCameraConstraintMode}
-        freeFlyEnabled={freeFlyEnabled}
-        setFreeFlyEnabled={setFreeFlyEnabled}
+        cameraMode={cameraMode}
+        setCameraMode={setCameraMode}
       />
       <LoadSaveExportMenu
         setLoadedModelUrl={setLoadedModelUrl}
