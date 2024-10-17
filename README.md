@@ -49,17 +49,14 @@ The Gaussian Splatting Viewer is an advanced, interactive 3D visualization tool 
 
 ## Installation and Setup
 
-1. **Clone the Repository**:
+**Clone the Repository**:
     git clone https://github.com/YourUsername/gaussian-splatting-viewer.git
     cd gaussian-splatting-viewer
-Copy
-    2. **Install Dependencies**:
+**Install Dependencies**:
     npm install
-Copy
-    3. **Run the Application**:
+**Run the Application**:
     npm start
-Copy
-    4. **Access the Application**:
+ **Access the Application**:
     Open your web browser and navigate to `http://localhost:3000`.
 
 ## Usage Guide
