@@ -143,7 +143,7 @@ const ExportPopup: React.FC<ExportPopupProps> = ({ onExport, onCancel, isModelLo
             onChange={() => setIncludeScrollControls(!includeScrollControls)}
             id="includeScrollControls"
           />
-          <CheckboxLabel htmlFor="includeScrollControls">Include scroll controls</CheckboxLabel>
+          <CheckboxLabel htmlFor="includeScrollControls">Include scroll UI</CheckboxLabel>
         </CheckboxContainer>
         <CheckboxContainer>
           <Checkbox

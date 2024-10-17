@@ -309,6 +309,7 @@ export const generateExportedHTML = (
   <div class="ui-overlay">
     <p><strong>Controls:</strong></p>
     <p>• W/A/S/D: Move camera</p>
+    <p>• Q/E: Up and Down</p>
     <p>• Mouse: Look around</p>
     <p>• Scroll: Move along path</p>
   </div>
@@ -433,6 +434,10 @@ export const generateExportedHTML = (
     camera.keysDown.push(83); // S
     camera.keysLeft.push(65); // A
     camera.keysRight.push(68); // D
+
+    //add q and e to move up and down
+    camera.keysUpward.push(81); // Q
+    camera.keysDownward.push(69); // E
 
     // Create a basic light
     new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
