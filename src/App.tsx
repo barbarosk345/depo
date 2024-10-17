@@ -592,6 +592,26 @@ engine.runRenderLoop(function () {
           if (loadedModels && Array.isArray(loadedModels)) {
             loadedMeshesRef.current = loadedModels;
           }
+
+          // Set camera position and rotation to the first waypoint
+          if (waypoints.length > 0 && cameraRef.current) {
+            const firstWaypoint = waypoints[0];
+            cameraRef.current.position = new BABYLON.Vector3(firstWaypoint.x, firstWaypoint.y, firstWaypoint.z);
+            cameraRef.current.rotationQuaternion = new BABYLON.Quaternion(
+              firstWaypoint.rotation._x,
+              firstWaypoint.rotation._y,
+              firstWaypoint.rotation._z,
+              firstWaypoint.rotation._w
+            ).normalize();
+  
+            // Reset scroll position and target
+            scrollPositionRef.current = 0;
+            scrollTargetRef.current = 0;
+  
+            // Execute interactions for the first waypoint
+            executeInteractions(firstWaypoint.interactions, 0);
+          }
+
         } catch (error) {
           console.error("Error loading model:", error);
           // Optionally, update UI or state to reflect the error
