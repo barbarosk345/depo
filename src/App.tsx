@@ -77,6 +77,7 @@ interface SaveFile {
   waypoints: Waypoint[];
   loadedModelUrl: string | null;
   hotspots: Hotspot[];
+  uiColor: string;
 }
 
 const App: React.FC = () => {
@@ -105,12 +106,11 @@ const App: React.FC = () => {
   const [cameraMode, setCameraMode] = useState<'tour' | 'explore' | 'auto'>('explore');
   const cameraModeRef = useRef<'tour' | 'explore' | 'auto'>('explore');
 
+  const [uiColor, setUiColor] = useState<string>("#4CAF50");
+
+
   const cameraDampeningRef = useRef(0.05);
   const [cameraDampening, setCameraDampening] = useState<number>(0.95);
-
-  const [cameraConstraintMode, setCameraConstraintMode] = useState<'auto' | 'path' >('path');
-  const [freeFlyEnabled, setFreeFlyEnabled] = useState(false);
-
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSplatLoading, setIsSplatLoading] = useState<boolean>(false);
@@ -174,6 +174,7 @@ const App: React.FC = () => {
       waypoints,
       loadedModelUrl,
       hotspots, // Include hotspots in the save data
+      uiColor
     };
   
     const jsonString = JSON.stringify(saveData, null, 2);
@@ -214,6 +215,7 @@ const App: React.FC = () => {
           setCameraMovementSpeed(saveData.cameraMovementSpeed);
           setCameraRotationSensitivity(saveData.cameraRotationSensitivity);
           setBackgroundColor(saveData.backgroundColor);
+          setUiColor(saveData.uiColor);
           setWaypoints(reconstructedWaypoints);
           setLoadedModelUrl(saveData.loadedModelUrl);
           setHotspots(reconstructedHotspots);
@@ -443,9 +445,7 @@ engine.runRenderLoop(function () {
     if (
       (!userControlRef.current &&
         pathRef.current.length >= 1 &&
-        !isEditMode &&
-        cameraConstraintMode === 'path' &&
-        !freeFlyEnabled)
+        !isEditMode)
     ) {
       // Camera position and rotation are handled via scrollPositionRef.current
       const t = scrollPositionRef.current / (pathRef.current.length - 1 || 1);
@@ -706,7 +706,8 @@ engine.runRenderLoop(function () {
       animationFrames,
       hotspots,
       defaultCameraMode,
-      cameraDampeningRef.current
+      cameraDampeningRef.current,
+      uiColor
     );
 
     const blob = new Blob([htmlContent], { type: "text/html" });
@@ -863,6 +864,8 @@ engine.runRenderLoop(function () {
         setBackgroundColor={setBackgroundColor}
         cameraSwing={cameraDampening}
         setCameraSwing={setCameraDampening}
+        uiColor={uiColor}
+        setUiColor={setUiColor}
       />
       <ScrollControls
         scrollPercentage={scrollPercentage}
@@ -871,6 +874,7 @@ engine.runRenderLoop(function () {
         setShowScrollControls={setShowScrollControls}
         cameraMode={cameraMode}
         setCameraMode={setCameraMode}
+        uiColor={uiColor}
       />
       <LoadSaveExportMenu
         setLoadedModelUrl={setLoadedModelUrl}
@@ -913,6 +917,7 @@ engine.runRenderLoop(function () {
         <InfoPopup
           text={infoPopupText}
           onClose={() => setInfoPopupText(null)}
+          uiColor={uiColor}
         />
       )}
     </div>

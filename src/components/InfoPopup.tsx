@@ -5,14 +5,15 @@ import styled from "styled-components";
 interface InfoPopupProps {
   text: string;
   onClose: () => void;
+  uiColor: string;
 }
 
-const InfoPopup: React.FC<InfoPopupProps> = ({ text, onClose }) => {
+const InfoPopup: React.FC<InfoPopupProps> = ({ text, onClose, uiColor }) => {
   return (
     <Overlay>
       <Popup>
         <Text>{text}</Text>
-        <CloseButton onClick={onClose}>Close</CloseButton>
+        <CloseButton uiColor={uiColor} onClick={onClose}>Close</CloseButton>
       </Popup>
     </Overlay>
   );
@@ -46,10 +47,10 @@ const Text = styled.p`
   font-size: 16px;
 `;
 
-const CloseButton = styled.button`
+const CloseButton = styled.button<{ uiColor: string }>`
   margin-top: 15px;
   padding: 8px 16px;
-  background-color: #007bff;
+  background-color: ${props => props.uiColor};
   color: white;
   border: none;
   border-radius: 4px;

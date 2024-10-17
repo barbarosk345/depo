@@ -4,6 +4,7 @@ import Draggable from "react-draggable";
 import styled from "styled-components";
 import { FiSettings, FiInfo } from "react-icons/fi";
 import BackgroundColorSelector from "./BackgroundColorSelector"; // Adjust the import path as needed
+import UIColorSelector from "./UIColorSelector";
 
 // Extend the interface to include backgroundColor props and camera swing
 interface ParameterControlsProps {
@@ -19,6 +20,8 @@ interface ParameterControlsProps {
   setCameraSwing: React.Dispatch<React.SetStateAction<number>>;
   backgroundColor: string;
   setBackgroundColor: (color: string) => void;
+  uiColor: string;
+  setUiColor: (color: string) => void;
 }
 
 const Container = styled.div`
@@ -193,6 +196,8 @@ const ParameterControls: React.FC<ParameterControlsProps> = ({
   setCameraSwing,
   backgroundColor,
   setBackgroundColor,
+  uiColor,
+  setUiColor,
 }) => {
   const [showControls, setShowControls] = useState<boolean>(true);
 
@@ -335,6 +340,10 @@ const ParameterControls: React.FC<ParameterControlsProps> = ({
             <BackgroundColorSelector
               backgroundColor={backgroundColor}
               setBackgroundColor={setBackgroundColor}
+            />
+            <UIColorSelector
+              uiColor={uiColor}
+              setUiColor={setUiColor}
             />
           </ControlsContainer>
         )}

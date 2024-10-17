@@ -25,7 +25,8 @@ export const generateExportedHTML = (
     color: string;
   }>,
   defaultCameraMode: "tour" | "explore" | "auto" = "explore",
-  cameraDampeningRef: number
+  cameraDampeningRef: number,
+  uiColor: string,
 ) => {
   return `
 <!DOCTYPE html>
@@ -149,11 +150,11 @@ export const generateExportedHTML = (
     #progressBar {
       width: 0%;
       height: 100%;
-      background-color: #4CAF50;
+      background-color: ${uiColor};
       transition: width 0.3s ease;
     }
     .button {
-      background-color: #4CAF50;
+      background-color: ${uiColor};
       border: none;
       color: white;
       padding: 10px 20px;
@@ -167,7 +168,7 @@ export const generateExportedHTML = (
       transition: background-color 0.3s;
     }
     .button:hover {
-      background-color: #45a049;
+       background-color: ${adjustColorBrightness(uiColor, -20)};
     }
     #scrollButtons {
       display: flex;
@@ -274,7 +275,7 @@ export const generateExportedHTML = (
 
     /* Ensure the toggleCameraMode button has consistent styling */
     #toggleCameraMode {
-      background-color: #4CAF50;
+      background-color: ${uiColor};
       border: none;
       color: white;
       padding: 10px 20px;
@@ -288,7 +289,7 @@ export const generateExportedHTML = (
       transition: background-color 0.3s;
     }
     #toggleCameraMode:hover {
-      background-color: #45a049;
+       background-color: ${adjustColorBrightness(uiColor, -20)};
     }
       
   </style>
@@ -671,7 +672,7 @@ export const generateExportedHTML = (
       const infoPopup = document.getElementById('infoPopup');
       infoPopup.innerHTML = \`
         <p>\${text}</p>
-        <button onclick="hideInfoPopup()" style="width: 100%; padding: 10px; background-color: #4CAF50; border: none; color: white; cursor: pointer; border-radius: 5px;">Close</button>
+        <button onclick="hideInfoPopup()" style="width: 100%; padding: 10px; background-color: ${uiColor}; border: none; color: white; cursor: pointer; border-radius: 5px;">Close</button>
       \`;
       infoPopup.style.display = 'block';
     }
@@ -1017,4 +1018,14 @@ export const generateExportedHTML = (
 </body>
 </html>
   `;
+
+  function adjustColorBrightness(color: string, percent: number) {
+    const num = parseInt(color.replace("#",""), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) + amt;
+    const G = (num >> 8 & 0x00FF) + amt;
+    const B = (num & 0x0000FF) + amt;
+    return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)).toString(16).slice(1);
+  }
+
 };

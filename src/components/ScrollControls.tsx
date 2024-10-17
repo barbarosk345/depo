@@ -9,6 +9,7 @@ interface ScrollControlsProps {
   setShowScrollControls: React.Dispatch<React.SetStateAction<boolean>>;
   cameraMode: 'tour' | 'explore' | 'auto';
   setCameraMode: React.Dispatch<React.SetStateAction<'tour' | 'explore' | 'auto'>>;
+  uiColor: string;
 }
 
 // Styled Components
@@ -47,7 +48,7 @@ const Title = styled.h3`
   color: #ffffff;
 `;
 
-const ToggleButton = styled.button`
+const ToggleButton = styled.button<{ uiColor: string }>`
   background: transparent;
   border: none;
   color: #ffffff;
@@ -60,7 +61,7 @@ const ToggleButton = styled.button`
   width: 100%;
   justify-content: center;
   &:hover {
-    color: #ffa500;
+      background-color: ${props => props.uiColor};
   }
 `;
 
@@ -89,7 +90,7 @@ const PercentageText = styled.p`
   text-align: center;
 `;
 
-const Button = styled.button`
+const Button = styled.button<{ uiColor: string }>`
   padding: 6px 12px;
   margin: 0 5px;
   background-color: #555555;
@@ -103,7 +104,7 @@ const Button = styled.button`
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: #ffa500;
+     background-color: ${props => props.uiColor};
   }
 `;
 
@@ -116,8 +117,8 @@ const ProgressBarContainer = styled.div`
   margin-bottom: 10px;
 `;
 
-const ProgressBar = styled.div<{ percentage: number }>`
-  background-color: #ffa500;
+const ProgressBar = styled.div<{ percentage: number, uiColor: string }>`
+  background-color: ${props => props.uiColor};
   height: 100%;
   width: ${({ percentage }) => percentage}%;
 `;
@@ -156,6 +157,7 @@ const ScrollControls: React.FC<ScrollControlsProps> = ({
   setShowScrollControls,
   cameraMode,
   setCameraMode,
+  uiColor
 }) => {
   const [isDraggingDisabled, setIsDraggingDisabled] = useState<boolean>(false);
   const handleMouseDown = () => setIsDraggingDisabled(true);
@@ -182,7 +184,7 @@ const ScrollControls: React.FC<ScrollControlsProps> = ({
         <Draggable handle=".handle" disabled={isDraggingDisabled}>
           <Handle className="handle" isDraggingDisabled={isDraggingDisabled}>
           <ControlRowCenter>
-                <ModeButton onClick={toggleCameraMode}>
+                <ModeButton onClick={toggleCameraMode} uiColor={uiColor}>
                   <IconWrapper>
                     {cameraMode === 'tour' ? <FiCamera /> : <FiMap />}
                   </IconWrapper>
@@ -195,7 +197,7 @@ const ScrollControls: React.FC<ScrollControlsProps> = ({
                 <ControlsContainer>
                 <PercentageText>Scroll Position: {Math.round(scrollPercentage)}%</PercentageText>
                 <ProgressBarContainer>
-                  <ProgressBar percentage={scrollPercentage} />
+                  <ProgressBar percentage={scrollPercentage} uiColor={uiColor}/>
                 </ProgressBarContainer>
   
                 <ControlRow>
@@ -206,6 +208,7 @@ const ScrollControls: React.FC<ScrollControlsProps> = ({
                     onTouchEnd={handleTouchEnd}
                     onClick={() => adjustScroll(-1)}
                     aria-label="Scroll Backward"
+                    uiColor={uiColor}
                   >
                     <FiArrowLeft style={{ marginRight: "4px" }} />
                     Backward
@@ -217,6 +220,7 @@ const ScrollControls: React.FC<ScrollControlsProps> = ({
                     onTouchEnd={handleTouchEnd}
                     onClick={() => adjustScroll(1)}
                     aria-label="Scroll Forward"
+                    uiColor={uiColor}
                   >
                     Forward
                     <FiArrowRight style={{ marginLeft: "4px" }} />
