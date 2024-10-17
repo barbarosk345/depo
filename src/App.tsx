@@ -827,7 +827,8 @@ engine.runRenderLoop(function () {
         Please drag and drop a <br /> .splat, .ply, .gltf, or .glb file to load.
       </div>
       <Preloader isLoading={isLoading || isSplatLoading} />
-      <WaypointControls waypoints={waypoints} setWaypoints={setWaypoints} isEditMode={isEditMode} setIsEditMode={setIsEditMode} scene={sceneRef.current ?? undefined}/>
+      <WaypointControls waypoints={waypoints} setWaypoints={setWaypoints} isEditMode={isEditMode} setIsEditMode={setIsEditMode} scene={sceneRef.current ?? undefined}         cameraMode={cameraMode}
+        setCameraMode={setCameraMode}/>
       <Controls />
       <ParameterControls
         scrollSpeed={scrollSpeed}

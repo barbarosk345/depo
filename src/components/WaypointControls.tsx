@@ -11,6 +11,8 @@ type WaypointControlsProps = {
   isEditMode: boolean;
   setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   scene?: BABYLON.Scene;
+  cameraMode: 'tour' | 'explore' | 'auto';
+  setCameraMode: React.Dispatch<React.SetStateAction<'tour' | 'explore' | 'auto'>>;
 };
 
 const WaypointControls: React.FC<WaypointControlsProps> = ({ 
@@ -18,11 +20,14 @@ const WaypointControls: React.FC<WaypointControlsProps> = ({
   setWaypoints, 
   isEditMode, 
   setIsEditMode, 
-  scene 
+  scene,
+  cameraMode,
+  setCameraMode,
 }) => {
   const [editingWaypointIndex, setEditingWaypointIndex] = useState<number | null>(null);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [collapsedWaypoints, setCollapsedWaypoints] = useState<Set<number>>(new Set());
+
 
   useEffect(() => {
     setCollapsedWaypoints(new Set(waypoints.map((_, index) => index)));
@@ -106,6 +111,9 @@ const WaypointControls: React.FC<WaypointControlsProps> = ({
 
   const toggleEditMode = () => {
     setIsEditMode(!isEditMode);
+    if(!isEditMode){
+       setCameraMode('explore');
+    }
   };
 
   const toggleWaypointCollapse = (index: number) => {
