@@ -1,121 +1,113 @@
 # Gaussian Splatting Viewer with HTML Export
 
-**Gaussian Splatting Viewer with HTML Export** is an interactive 3D visualization tool built with React and Babylon.js. It allows users to load, manipulate, and explore 3D models seamlessly through an intuitive user interface. Additionally, it provides robust HTML export functionality, enabling users to generate standalone HTML files of their customized 3D scenes for easy sharing and deployment.
+## Overview
 
-## Table of Contents
-- [Features](#features)
-- [Demo](#demo)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Technologies Used](#technologies-used)
-- [Contributing](#contributing)
-- [License](#license)
-- [Acknowledgements](#acknowledgements)
+The Gaussian Splatting Viewer is an advanced, interactive 3D visualization tool built with React and Babylon.js. It offers users the ability to load, manipulate, and explore 3D models, particularly those in the Gaussian Splatting format (.splat), as well as other common 3D formats like .ply, .gltf, and .glb. This application stands out with its intuitive user interface, comprehensive waypoint system for camera path creation, and robust HTML export functionality, allowing users to generate standalone, shareable versions of their customized 3D scenes.
 
-## Features
+## Key Features
 
-### 3D Model Loading
-- **Drag-and-Drop**: Easily load `.splat`, `.ply`, `.gltf`, or `.glb` files by dragging them into the application.
-- **URL Loading**: Load models from predefined URLs or provide custom URLs for dynamic model loading.
+### 1. Versatile 3D Model Loading
+- **Drag-and-Drop Support**: Easily load .splat, .ply, .gltf, or .glb files by dragging them into the application.
+- **URL-based Loading**: Load models from predefined URLs or custom URLs for dynamic model integration.
+- **PLY to Splat Conversion**: Built-in functionality to convert .ply files to the .splat format.
 
-### Waypoint Management
-- **Edit Waypoints**: Adjust the camera's path by editing X, Y, Z coordinates of waypoints.
-- **Add/Remove Waypoints**: Dynamically add new waypoints based on the current camera position or remove existing ones.
+### 2. Advanced Waypoint System
+- **Dynamic Waypoint Management**: Add, edit, or remove waypoints to create custom camera paths.
+- **Precise Coordinate Control**: Fine-tune X, Y, Z coordinates and rotation for each waypoint.
+- **Interactive Editing**: Use gizmos for visual, drag-and-drop editing of waypoint positions and rotations.
 
-### Camera Controls
-- **Interactive Movement**: Navigate through the 3D scene using W/A/S/D keys, mouse movements, and gamepad support.
-- **Scroll Navigation**: Use scroll controls or buttons to move the camera along the predefined path.
-- **Customization**: Adjust camera movement speed and rotation sensitivity to suit your preferences.
+### 3. Sophisticated Camera Controls
+- **Multiple Camera Modes**: 
+  - 'Tour' mode for guided experiences
+  - 'Explore' mode for free navigation
+  - 'Auto' mode for dynamic switching between guided and free exploration
+- **Keyboard and Mouse Navigation**: Use W/A/S/D keys for movement, mouse for looking around, and scroll wheel for path traversal.
+- **Gamepad Support**: Enhanced control options with gamepad compatibility.
 
-### User Interface
-- **Draggable UI Panels**: All control panels are draggable, allowing users to position them as desired.
-- **Parameter Adjustments**: Modify scroll speed, animation frames, camera speed, and rotation sensitivity in real-time.
-- **Background Customization**: Change the scene's background color using a color picker.
+### 4. Rich Interaction System
+- **Audio Interactions**: Attach spatial or non-spatial audio to waypoints.
+- **Info Pop-ups**: Display informative text at specific waypoints.
+- **Customizable Hotspots**: Create interactive points of interest within the 3D scene.
 
-### Export Functionality
-- **Standalone HTML Export**: Export the current scene configuration, including camera path and loaded models, to a standalone HTML file for easy sharing and deployment.
+### 5. Flexible User Interface
+- **Draggable UI Components**: All control panels can be repositioned for a customized layout.
+- **Real-time Parameter Adjustments**: Modify scroll speed, animation frames, camera behavior, and more on-the-fly.
+- **Visual Customization**: Adjust background color and UI color to suit preferences or branding needs.
 
-### Interactive Elements
-- **Hover Interactions**: Interactive hotspots with tooltips enhance the user experience.
-- **WebXR Support**: If supported by the browser, experience the scene in immersive VR.
+### 6. Comprehensive Export Functionality
+- **Standalone HTML Export**: Generate a self-contained HTML file of the entire scene, including models, camera paths, and interactions.
+- **Customizable Export Options**: Choose to include or exclude UI elements, set default camera modes, and more.
 
-## Demo
-Currently, there is no live demo available. Please follow the [Installation](#installation) section to set up the application locally and explore its features.
+### 7. Performance and Compatibility
+- **Optimized Rendering**: Utilizes Babylon.js for efficient 3D rendering.
+- **WebXR Support**: Enables immersive VR experiences when supported by the browser and hardware.
 
-## Installation
+### 8. Developer-Friendly Architecture
+- **React-based Structure**: Modular component design for easy maintenance and extensibility.
+- **TypeScript Integration**: Strong typing for improved code quality and developer experience.
+- **State Management**: Efficient state handling using React hooks and context.
 
-Follow these steps to set up and run the Gaussian Splatting Viewer locally.
+## Installation and Setup
 
-### Prerequisites
-- **Node.js**: Ensure you have Node.js installed. You can download it from [here](https://nodejs.org/).
-- **npm**: Package manager for installing dependencies.
-
-### Steps
 1. **Clone the Repository**:
-    ```bash
-    git clone https://github.com/SonnyC56/gaussian-splatting-viewer.git
+    git clone https://github.com/YourUsername/gaussian-splatting-viewer.git
     cd gaussian-splatting-viewer
-    ```
-2. **Install Dependencies**:
-    Using npm:
-    ```bash
+Copy
+    2. **Install Dependencies**:
     npm install
-    ```
-3. **Run the Application**:
-    Using npm:
-    ```bash
+Copy
+    3. **Run the Application**:
     npm start
-    ```
-4. **Access the App**:  
-    Open your browser and navigate to `http://localhost:3000` to view the application.
+Copy
+    4. **Access the Application**:
+    Open your web browser and navigate to `http://localhost:3000`.
 
-## Usage
+## Usage Guide
 
-Explore the various features of Gaussian Splatting Viewer through its user-friendly interface.
+### Loading Models
+- Drag and drop supported file formats directly onto the viewer.
+- Use the "Load Custom Splat" option in the Load/Save menu to load models via URL.
+- Convert .ply files to .splat format using the built-in converter.
 
-### Loading 3D Models
-- **Drag-and-Drop**: Drag a `.splat`, `.ply`, `.gltf`, or `.glb` file onto the application window to load the model.
-- **URL Loading**: Use the predefined buttons to load sample models.  
-  Enter a custom model URL in the input field and click "Load Custom Splat" to load models from external sources.
+### Creating and Editing Waypoints
+- Access the Waypoint Controls panel to add, remove, or edit waypoints.
+- Use the position gizmos to visually adjust waypoint locations.
+- Fine-tune waypoint positions and rotations using the numerical inputs.
 
-### Managing Waypoints
-- **Edit Coordinates**: Navigate to the "Edit Waypoints" panel. Adjust the X, Y, Z values for each waypoint to redefine the camera path.
-- **Add Waypoints**: Click "Add Waypoint at Current Position" to append a new waypoint based on the camera's current location.
-- **Remove Waypoints**: Click the "Delete" button next to a waypoint to remove it from the path.
+### Customizing Interactions
+- Click "Edit Interactions" on a waypoint to add audio or info pop-up interactions.
+- Use the Hotspot Manager to create and edit interactive points in the scene.
 
-### Adjusting Parameters
-- **Scroll Speed**: Modify how quickly the camera moves along the path during scroll interactions.
-- **Animation Frames**: Set the number of frames for smooth camera animations.
-- **Camera Speed**: Adjust the movement speed of the camera using W/A/S/D keys.
-- **Camera Rotation Sensitivity**: Change how responsive the camera rotation is to mouse movements.
+### Navigating the Scene
+- Toggle between 'Tour', 'Explore', and 'Auto' camera modes.
+- Use WASD keys for movement and mouse for looking around in 'Explore' mode.
+- Scroll or use the forward/backward buttons to move along the path in 'Tour' mode.
 
-### Background Customization
-Use the color picker in the "Background Color" panel to change the scene's background to your preferred color.
+### Adjusting Visual Settings
+- Use the Parameter Controls to modify camera behavior, animation settings, and more.
+- Change the background color and UI color to customize the viewer's appearance.
 
-### Exporting the Scene
-Click the "Export Scene" button to generate a standalone HTML file of your current setup.  
-Specify if you want to include the UI controls in the exported file.  
-Download and share your customized 3D scene effortlessly.
-
-### Interactive Controls Info
-Access the "Controls" panel to view a summary of all available controls and interactions within the application.
+### Exporting Your Scene
+- Click "Export Scene" in the Load/Save menu.
+- Configure export options like including scroll controls or setting the default camera mode.
+- Download the generated HTML file for easy sharing and deployment.
 
 ## Project Structure
-```bash
-gaussian-splatting-viewer/
-├── public/
-│   ├── index.html
-│   └── ...
-├── src/
-│   ├── components/
-│   │   └── App.tsx
-│   ├── assets/
-│   ├── styles/
-│   │   └── App.css
-│   ├── index.tsx
-│   └── ...
-├── package.json
-├── tsconfig.json
-├── README.md
-└── ...
+
+- `src/components/`: React components for UI elements and controls.
+- `src/tools/`: Utility functions for file handling, export generation, etc.
+- `src/App.tsx`: Main application component orchestrating the viewer's functionality.
+
+## Contributing
+
+Contributions to the Gaussian Splatting Viewer are welcome! Please refer to the project's GitHub repository for contribution guidelines, issue reporting, and pull request processes.
+
+## License
+
+MIT License
+
+## Acknowledgements
+
+- Babylon.js for 3D rendering capabilities.
+- React and TypeScript are used to provide a robust development framework.
+- Contributors and maintainers of various open-source libraries used in this project.
